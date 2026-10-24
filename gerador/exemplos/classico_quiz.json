@@ -1,0 +1,6 @@
+{"theme":"violet","scenes":[
+{"type":"hook","lines":["Quiz de QA:"],"accent":"você acerta?","sub":"2 perguntas. 3 segundos cada. Valendo!"},
+{"type":"quiz","eyebrow":"Pergunta 1 de 2","question":"Qual critério de aceite dá pra testar?","options":["O sistema deve ser rápido","A busca responde em até 2 s","A tela deve ser intuitiva"],"answer":1,"explain":"Testável é mensurável. Sem métrica, não tem como passar ou falhar."},
+{"type":"quiz","eyebrow":"Pergunta 2 de 2","question":"O que não pode faltar num bug reportado?","options":["Passos pra reproduzir + evidência","Só um título bem chamativo","Uma mensagem rápida no chat"],"answer":0,"explain":"Sem passos e evidência, o dev não reproduz e o bug volta."},
+{"type":"cta","lines":["Acertou","as duas?"],"accent":"Comenta 👇","sub":"E manda pro time testar também.","button":"testcaseai.com.br →"}
+]}

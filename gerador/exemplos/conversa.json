@@ -1,0 +1,12 @@
+{"style":"chat","scenes":[
+{"type":"chat","title":"Squad Checkout","members":{"PO":"#F79009","Dev":"#7A5AF8","QA":"#12B76A"},"me":"QA","messages":[
+{"from":"PO","text":"Gente, a história do login tá pronta pra sprint? 🚀"},
+{"from":"Dev","text":"Pra mim tá: “login rápido e seguro”."},
+{"from":"QA","text":"Rápido quanto? E se errar a senha 3 vezes?"},
+{"from":"PO","text":"…boa pergunta 😅","pause":0.3},
+{"from":"Dev","text":"Sem isso eu chuto, e você testa o chute."},
+{"sys":true,"text":"QA compartilhou 4 cenários gerados a partir da história"},
+{"from":"PO","text":"Ah, agora dá pra estimar."},
+{"from":"Dev","text":"E eu sei exatamente o que entregar 👏"}],"hold":1.2},
+{"type":"fim","lines":["Requisito claro","evita retrabalho."],"sub":"O testcaseAI aponta o que falta na história antes da sprint.","url":"testcaseai.com.br →"}
+]}

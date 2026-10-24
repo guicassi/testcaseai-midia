@@ -1,0 +1,8 @@
+{"style":"pop","scenes":[
+{"type":"grito","lines":["3 sinais","de que o QA","virou gargalo"],"bg":"#FF5CA8","seed":1},
+{"type":"sticker","num":"1","kicker":"Sinal","text":"Tudo trava no fim da sprint esperando teste.","bg":"#3D5AFE","dot":"#C6F432","seed":2},
+{"type":"sticker","num":"2","kicker":"Sinal","text":"Ninguém sabe o que já foi coberto.","bg":"#FFB800","dot":"#FF5CA8","seed":3},
+{"type":"sticker","num":"3","kicker":"Sinal","text":"O mesmo bug volta a cada release.","bg":"#00C2A8","dot":"#FFB800","seed":4},
+{"type":"grito","lines":["Não é falha","do time.","É processo."],"bg":"#111111","fg":"#C6F432","seed":5},
+{"type":"fim","lines":["Destrave","seu QA."],"sub":"Casos, execução e evidências num lugar só.","url":"testcaseai.com.br →","bg":"#C6F432","seed":6}
+]}

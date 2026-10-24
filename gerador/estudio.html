@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estúdio de Reels testcaseAI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #111; }
+  body.render { width: 1080px; height: 1920px; overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .abs { position: absolute; }
+  .w { display: inline-block; }
+
+  /* ===== EDITORIAL ===== */
+  .ed { background: #F1ECE2; color: #111; font-family: "Inter Display", "Inter", sans-serif; }
+  .ed .grain { position: absolute; inset: 0; opacity: .10; background-image: repeating-radial-gradient(circle at 17% 32%, #000 0 1px, transparent 1px 4px), repeating-radial-gradient(circle at 71% 63%, #000 0 1px, transparent 1px 5px); mix-blend-mode: multiply; }
+  .ed .rule { position: absolute; left: 80px; right: 80px; height: 6px; background: #111; }
+  .ed .kicker { font-family: "Inter", sans-serif; font-weight: 800; font-size: 34px; letter-spacing: .18em; text-transform: uppercase; }
+  .ed .mega { font-weight: 900; font-size: 196px; line-height: .86; letter-spacing: -0.055em; text-transform: uppercase; }
+  .ed .big { font-weight: 900; font-size: 120px; line-height: .9; letter-spacing: -0.045em; text-transform: uppercase; }
+  .ed .serif { font-family: "Lora", serif; font-style: italic; font-weight: 500; font-size: 64px; line-height: 1.15; letter-spacing: -0.01em; }
+  .ed .block { position: absolute; }
+  .ed .stamp { display: inline-block; padding: 10px 26px 4px; border: 8px solid currentColor; font-weight: 900; font-size: 92px; letter-spacing: .02em; text-transform: uppercase; }
+  .ed .item { display: flex; gap: 34px; align-items: baseline; padding: 30px 0; border-bottom: 4px solid #111; }
+  .ed .item .n { font-weight: 900; font-size: 100px; line-height: .8; letter-spacing: -0.05em; min-width: 140px; }
+  .ed .item .t { font-family: "Lora", serif; font-style: italic; font-size: 60px; line-height: 1.12; }
+  .ed .url { font-weight: 900; font-size: 64px; letter-spacing: -0.02em; }
+
+  /* ===== TERMINAL ===== */
+  .tm { background: #030604; color: #3CFF7E; font-family: "DejaVu Sans Mono", monospace; }
+  .tm .scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 3px, transparent 3px 6px); pointer-events: none; }
+  .tm .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,.85) 100%); }
+  .tm .glow { text-shadow: 0 0 6px rgba(60,255,126,.85), 0 0 22px rgba(60,255,126,.35); }
+  .tm .scr { position: absolute; left: 64px; top: 330px; width: 960px; font-size: 44px; line-height: 1.55; white-space: pre-wrap; }
+  .tm .amber { color: #FFB43C; text-shadow: 0 0 8px rgba(255,180,60,.8); }
+  .tm .red { color: #FF4D5E; text-shadow: 0 0 8px rgba(255,77,94,.8); }
+  .tm .dim { opacity: .55; }
+  .tm .huge { font-size: 132px; line-height: 1.02; font-weight: 700; letter-spacing: -0.02em; }
+  .tm .cur { display: inline-block; width: 24px; height: 46px; background: #3CFF7E; vertical-align: -8px; box-shadow: 0 0 12px #3CFF7E; }
+
+  /* ===== CHAT ===== */
+  .ch { background: #E9EDF3; color: #101828; font-family: "Inter", sans-serif; }
+  .ch .top { position: absolute; left: 0; right: 0; top: 0; height: 250px; background: #FFFFFF; border-bottom: 2px solid #D8DEE8; display: flex; align-items: flex-end; gap: 26px; padding: 0 60px 34px; }
+  .ch .grp { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, #1BB2F8, #9150F8); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 40px; }
+  .ch .gname { font-weight: 750; font-size: 46px; letter-spacing: -0.02em; }
+  .ch .gsub { font-size: 30px; color: #667085; margin-top: 4px; }
+  .ch .feed { position: absolute; left: 0; right: 0; top: 250px; bottom: 0; overflow: hidden; }
+  .ch .inner { position: absolute; left: 0; right: 0; padding: 0 48px; }
+  .ch .msg { display: flex; gap: 20px; align-items: flex-end; margin-top: 28px; }
+  .ch .msg.me { flex-direction: row-reverse; }
+  .ch .av { flex: 0 0 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 32px; }
+  .ch .bub { max-width: 760px; padding: 24px 32px 26px; border-radius: 40px; background: #FFFFFF; font-size: 44px; line-height: 1.32; letter-spacing: -0.01em; box-shadow: 0 4px 14px rgba(16,24,40,.06); }
+  .ch .bub .who { display: block; font-weight: 750; font-size: 30px; margin-bottom: 6px; }
+  .ch .msg.me .bub { background: #2E6BF2; color: #fff; }
+  .ch .typing { display: inline-flex; gap: 12px; padding: 30px 34px; border-radius: 40px; background: #fff; }
+  .ch .typing i { width: 18px; height: 18px; border-radius: 50%; background: #98A2B3; display: block; }
+  .ch .sys { margin: 30px auto 0; width: fit-content; max-width: 900px; padding: 18px 30px; border-radius: 22px; background: #D9F2E6; color: #05603A; font-weight: 650; font-size: 34px; text-align: center; }
+  .ch .end { position: absolute; inset: 0; background: #2E6BF2; color: #fff; }
+  .ch .end .t { font-weight: 800; font-size: 104px; line-height: 1.02; letter-spacing: -0.04em; }
+  .ch .end .s { font-size: 46px; line-height: 1.3; opacity: .9; }
+  .ch .end .u { display: inline-block; padding: 30px 50px; border-radius: 999px; background: #fff; color: #2E6BF2; font-weight: 800; font-size: 50px; }
+  /* ===== QUADRO BRANCO ===== */
+  .qb { background: #FBFBF8; color: #1D2A6B; font-family: "Poppins", sans-serif; }
+  .qb .dots { position: absolute; inset: 0; background-image: radial-gradient(#D5D9E4 2px, transparent 2px); background-size: 48px 48px; }
+  .qb .hw { font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; }
+  .qb .xl { font-size: 112px; } .qb .lg { font-size: 72px; } .qb .md { font-size: 52px; } .qb .sm { font-size: 42px; font-weight: 500; }
+  .qb svg.ink { position: absolute; left: 0; top: 0; overflow: visible; }
+  .qb .reveal { clip-path: inset(0 100% 0 0); }
+
+  /* ===== TRAILER ===== */
+  .tr { background: #000; color: #F3EEE6; font-family: "Lora", serif; }
+  .tr .bars::before, .tr .bars::after { content: ""; position: absolute; left: 0; right: 0; height: 250px; background: #000; z-index: 5; }
+  .tr .bars::before { top: 0; } .tr .bars::after { bottom: 0; }
+  .tr .haze { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, rgba(255,190,120,.16), transparent 60%); }
+  .tr .ttl { position: absolute; left: 60px; right: 60px; text-align: center; text-transform: uppercase; letter-spacing: .14em; font-weight: 500; }
+  .tr .c1 { font-size: 76px; line-height: 1.35; }
+  .tr .c2 { font-size: 150px; letter-spacing: .06em; font-weight: 700; line-height: 1.0; }
+  .tr .c3 { font-size: 46px; letter-spacing: .3em; font-style: italic; text-transform: none; font-weight: 400; }
+  .tr .dust { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #F3EEE6; }
+  .tr .flash { position: absolute; inset: 0; background: #FFF6E8; opacity: 0; z-index: 6; }
+  .tr .url { font-family: "Inter", sans-serif; font-weight: 600; font-size: 44px; letter-spacing: .12em; color: #D9B36C; }
+
+  /* ===== POP GEOMÉTRICO ===== */
+  .pp { font-family: "Poppins", sans-serif; overflow: hidden; }
+  .pp .shape { position: absolute; }
+  .pp .yell { font-weight: 700; font-size: 128px; line-height: 1.0; letter-spacing: -0.04em; }
+  .pp .stk { position: absolute; left: 90px; top: 560px; width: 900px; padding: 60px 60px 70px; border-radius: 48px; background: #fff; color: #111; border: 8px solid #111; box-shadow: 18px 18px 0 #111; }
+  .pp .stk .n { position: absolute; right: -40px; top: -110px; width: 230px; height: 230px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 130px; border: 8px solid #111; }
+  .pp .stk .k { font-weight: 700; font-size: 38px; letter-spacing: .12em; text-transform: uppercase; opacity: .55; }
+  .pp .stk .x { font-weight: 600; font-size: 70px; line-height: 1.12; letter-spacing: -0.03em; margin-top: 14px; }
+  .pp .cta { display: inline-block; padding: 34px 56px; border-radius: 999px; background: #111; color: #fff; font-weight: 700; font-size: 52px; box-shadow: 10px 10px 0 rgba(0,0,0,.25); }
+</style>
+</head>
+<body class="render">
+<div id="stage"><div id="scenes"></div></div>
+
+<script type="application/json" id="config">
+{"style":"editorial","scenes":[{"type":"manchete","kicker":"Edição de sexta","lines":["Testou?","Prova."],"color":"#E8452C","sub":"“Funcionou na minha máquina” não é evidência."},{"type":"fim","lines":["Qualidade","com prova."],"url":"testcaseai.com.br"}]}
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a=0, b=1) => Math.min(b, Math.max(a, x));
+const P = (t, a, d) => clamp((t - a) / d);
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eIn = x => x*x*x;
+const eInOut = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2;
+const eBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(x-1,3) + c1*Math.pow(x-1,2); };
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const h = (tag, cls, html, style) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (style) e.style.cssText = style; return e; };
+const words = (txt, cls="") => txt.split(" ").map(w => `<span class="w ${cls}">${esc(w)}</span>`).join(" ");
+const fit = (els, maxW, base) => { // mesma fonte para todas as linhas, a maior que caiba
+  let fs = base; const wrap = h("div", "ed", "", "position:absolute; left:0; top:0; visibility:hidden"); $("stage").append(wrap); const probe = h("div", "", "", "position:absolute; white-space:nowrap"); wrap.append(probe);
+  els.forEach(e => { probe.className = e.className.replace("abs", ""); probe.style.fontSize = base + "px"; probe.innerHTML = e.innerHTML; const w = probe.scrollWidth; if (w > maxW) fs = Math.min(fs, Math.floor(base * maxW / w)); });
+  wrap.remove(); els.forEach(e => { e.style.fontSize = fs + "px"; e.style.whiteSpace = "nowrap"; }); return fs; };
+const hash = n => { const x = Math.sin(n*12.9898)*43758.5453; return x - Math.floor(x); };
+
+/* ================= EDITORIAL ================= */
+const ED = {
+  base(el) { el.classList.add("ed"); el.append(h("div", "grain")); return el; },
+  manchete(c) {
+    const el = ED.base(h("div", "scene"));
+    const k = h("div", "abs kicker", esc(c.kicker || ""), "left:80px; top:300px"); el.append(k);
+    const r1 = h("div", "rule", "", "top:360px"); el.append(r1);
+    const blk = h("div", "block", "", `left:0; top:420px; height:${c.lines.length*172 + 80}px; width:1080px; background:${c.color || "#E8452C"}`); el.append(blk);
+    const L = c.lines.map((l, i) => h("div", "abs mega", esc(l), "left:72px; color:#111"));
+    const fs = fit(L, 930, 210), lh = Math.round(fs*.95); L.forEach((e, i) => { e.style.top = (460 + i*lh) + "px"; el.append(e); });
+    blk.style.height = (c.lines.length*lh + 90) + "px";
+    const subTop = 420 + c.lines.length*lh + 160;
+    const sub = c.sub ? h("div", "abs serif", esc(c.sub), `left:80px; top:${subTop}px; width:900px`) : null; if (sub) el.append(sub);
+    const ev = [[0, "scratch"], [.35, "rip"]].concat(L.map((_, i) => [.7 + i*.38, "stamp"])); if (sub) ev.push([.7 + L.length*.38 + .3, "type_s"]);
+    const tS = .7 + L.length*.38 + .3;
+    return { el, dur: tS + (sub ? 2.2 : 1.2), events: ev, anim(t) {
+      k.style.opacity = t > .1 ? 1 : 0; r1.style.transform = `scaleX(${eOut(P(t, .05, .35))})`; r1.style.transformOrigin = "left";
+      blk.style.transform = `scaleX(${eInOut(P(t, .3, .35))})`; blk.style.transformOrigin = "left";
+      L.forEach((e, i) => { const a = .7 + i*.38, kk = P(t, a, .12); e.style.opacity = kk > 0 ? 1 : 0; e.style.transform = `scale(${1 + (1-kk)*.5})`; e.style.transformOrigin = "left center"; });
+      const shake = L.some((_, i) => t > .7 + i*.38 && t < .7 + i*.38 + .12) ? (hash(t*100)-.5)*18 : 0; el.style.transform = `translate(${shake}px, ${shake*.6}px)`;
+      if (sub) { const n = Math.floor(c.sub.length * P(t, tS, Math.min(1.4, c.sub.length*.03))); sub.textContent = c.sub.slice(0, n); }
+    }};
+  },
+  lista(c) {
+    const el = ED.base(h("div", "scene"));
+    const k = h("div", "abs kicker", esc(c.kicker || ""), "left:80px; top:360px"); el.append(k);
+    const T = h("div", "abs big", esc(c.title), "left:76px; top:410px; width:930px"); el.append(T);
+    const box = h("div", "abs", "", `left:80px; top:${c.top || 620}px; width:920px; border-top:6px solid #111`); el.append(box);
+    const its = c.items.map((it, i) => { const e = h("div", "item", `<span class="n" style="color:${i === c.items.length - 1 && c.lastColor ? c.lastColor : "#111"}">${String(i+1).padStart(2, "0")}</span><span class="t">${esc(it)}</span>`); box.append(e); return e; });
+    const ev = [[.15, "stamp"]].concat(its.map((_, i) => [.8 + i*.75, "snap"]));
+    return { el, dur: .8 + its.length*.75 + 1.4, events: ev, anim(t) {
+      k.style.opacity = t > .05 ? 1 : 0; const kk = P(t, .15, .12); T.style.opacity = kk > 0 ? 1 : 0; T.style.transform = `scale(${1 + (1-kk)*.3})`; T.style.transformOrigin = "left top";
+      box.style.borderTopColor = t > .5 ? "#111" : "transparent";
+      its.forEach((e, i) => { const q = eOut(P(t, .8 + i*.75, .3)); e.style.opacity = q; e.style.transform = `translateY(${(1-q)*40}px)`; });
+    }};
+  },
+  versus(c) {
+    const el = ED.base(h("div", "scene"));
+    const top = h("div", "block", "", "left:0; top:0; width:1080px; height:960px; background:#111"); el.append(top);
+    const bot = h("div", "block", "", `left:0; top:960px; width:1080px; height:960px; background:${c.color || "#FFD23F"}`); el.append(bot);
+    const a1 = h("div", "abs kicker", esc(c.aLabel || "Sem processo"), "left:80px; top:300px; color:#F1ECE2"); el.append(a1);
+    const a2 = h("div", "abs big", esc(c.a), "left:76px; top:360px; width:930px; color:#F1ECE2"); el.append(a2);
+    const b1 = h("div", "abs kicker", esc(c.bLabel || "Com processo"), "left:80px; top:1020px"); el.append(b1);
+    const b2 = h("div", "abs big", esc(c.b), "left:76px; top:1080px; width:930px"); el.append(b2);
+    const ev = [[.1, "rip"], [.4, "stamp"], [1.5, "rip"], [1.8, "stamp"]];
+    return { el, dur: 3.6, events: ev, anim(t) {
+      top.style.transform = `translateY(${(1-eOut(P(t, .05, .3)))*-960}px)`; bot.style.transform = `translateY(${(1-eOut(P(t, 1.45, .3)))*960}px)`;
+      a1.style.opacity = a2.style.opacity = t > .4 ? 1 : 0; b1.style.opacity = b2.style.opacity = t > 1.8 ? 1 : 0;
+      a2.style.transform = `scale(${1 + (1-P(t, .4, .12))*.3})`; b2.style.transform = `scale(${1 + (1-P(t, 1.8, .12))*.3})`; a2.style.transformOrigin = b2.style.transformOrigin = "left top";
+    }};
+  },
+  carimbo(c) {
+    const el = ED.base(h("div", "scene"));
+    const T = h("div", "abs big", esc(c.title), "left:76px; top:480px; width:930px"); el.append(T);
+    const st = h("div", "abs", `<span class="stamp">${esc(c.stamp)}</span>`, `left:110px; top:${c.stampTop || 900}px; color:${c.color || "#E8452C"}`); el.append(st);
+    const sub = c.sub ? h("div", "abs serif", esc(c.sub), `left:80px; top:${(c.stampTop || 900) + 220}px; width:900px`) : null; if (sub) el.append(sub);
+    const ev = [[.15, "snap"], [1.0, "thump"]]; if (sub) ev.push([1.5, "type_s"]);
+    return { el, dur: sub ? 3.6 : 2.6, events: ev, anim(t) {
+      T.style.opacity = eOut(P(t, .1, .3)); const kk = P(t, 1.0, .14);
+      st.style.opacity = kk > 0 ? .95 : 0; st.style.transform = `rotate(-8deg) scale(${1 + (1-kk)*1.4})`; st.style.transformOrigin = "left center";
+      const shake = t > 1.0 && t < 1.18 ? (hash(t*100)-.5)*22 : 0; el.style.transform = `translate(${shake}px, ${shake*.5}px)`;
+      if (sub) { const n = Math.floor(c.sub.length * P(t, 1.5, Math.min(1.4, c.sub.length*.03))); sub.textContent = c.sub.slice(0, n); }
+    }};
+  },
+  fim(c) {
+    const el = ED.base(h("div", "scene"));
+    const blk = h("div", "block", "", `left:0; top:0; width:1080px; height:1920px; background:${c.color || "#111"}`); el.append(blk);
+    const LL = c.lines.map(l => h("div", "abs mega", words(l), "left:72px; color:#F1ECE2")); const fs = fit(LL, 930, 210), lh = Math.round(fs*.95);
+    LL.forEach((e, i) => { e.style.top = (560 + i*lh) + "px"; el.append(e); }); const yB = 560 + LL.length*lh + 50;
+    const r = h("div", "rule", "", `top:${yB}px; background:#F1ECE2`); el.append(r);
+    const u = h("div", "abs url", esc(c.url || "testcaseai.com.br"), `left:80px; top:${yB + 40}px; color:#FFD23F`); el.append(u);
+    const s = c.sub ? h("div", "abs serif", esc(c.sub), `left:80px; top:${yB + 140}px; width:900px; color:#F1ECE2; font-size:52px`) : null; if (s) el.append(s);
+    const ws = LL.flatMap(e => [...e.querySelectorAll(".w")]);
+    const ev = [[0, "rip"]].concat(ws.map((_, i) => [.4 + i*.22, "stamp"]), [[.4 + ws.length*.22 + .2, "end"]]);
+    const tU = .4 + ws.length*.22 + .2;
+    return { el, dur: tU + 2.0, events: ev, anim(t) {
+      blk.style.transform = `translateY(${(1-eOut(P(t, 0, .3)))*1920}px)`;
+      ws.forEach((w, i) => { const kk = P(t, .4 + i*.22, .1); w.style.opacity = kk > 0 ? 1 : 0; w.style.transform = `scale(${1 + (1-kk)*.6})`; });
+      r.style.transform = `scaleX(${eOut(P(t, tU, .4))})`; r.style.transformOrigin = "left";
+      u.style.opacity = t > tU + .15 ? 1 : 0; if (s) s.style.opacity = eOut(P(t, tU + .4, .4));
+    }};
+  }
+};
+
+/* ================= TERMINAL ================= */
+const TM = {
+  base(el) { el.classList.add("tm"); return el; },
+  overlay(el) { el.append(h("div", "scan")); el.append(h("div", "vig")); },
+  log(c) {
+    // c.lines: [{t:"texto", k:"cmd|ok|fail|info|warn|blank", d:delay opcional}]
+    const el = TM.base(h("div", "scene")); const scr = h("div", "scr glow"); el.append(scr); TM.overlay(el);
+    let tt = .3; const items = [], ev = [];
+    (c.title ? [{ t: c.title, k: "title" }] : []).concat(c.lines).forEach(L => {
+      const typed = L.k === "cmd"; const dur = typed ? Math.min(1.6, .05 * L.t.length + .2) : .05;
+      items.push({ ...L, a: tt, d: dur });
+      if (typed) { for (let i = 0; i < L.t.length; i += 1) ev.push([tt + dur * i / L.t.length, "key"]); ev.push([tt + dur + .05, "enter"]); }
+      else if (L.k === "ok") ev.push([tt, "blip", 1]); else if (L.k === "fail") ev.push([tt, "err"]); else if (L.k === "title") ev.push([tt, "boot"]); else ev.push([tt, "blip", 0]);
+      tt += dur + (L.k === "cmd" ? .35 : (L.p != null ? L.p : .32));
+    });
+    return { el, dur: tt + (c.hold || 1.4), events: ev, anim(t) {
+      let html = "";
+      for (const it of items) { if (t < it.a) break;
+        if (it.k === "title") { html += `<span class="amber">${esc(it.t)}</span>\n\n`; continue; }
+        const n = it.k === "cmd" ? Math.floor(it.t.length * P(t, it.a, it.d)) : it.t.length;
+        const pre = it.k === "cmd" ? `<span class="amber">$</span> ` : "";
+        const cls = { ok: "", fail: "red", warn: "amber", info: "dim", cmd: "" }[it.k] || "";
+        html += pre + `<span class="${cls}">${esc(it.t.slice(0, n))}</span>` + (it.k === "cmd" && n < it.t.length ? "" : "\n"); }
+      scr.innerHTML = html + `<span class="cur" style="opacity:${Math.floor(t*2.5) % 2 ? 0 : 1}"></span>`;
+      const fl = .92 + .08*hash(Math.floor(t*30)); el.style.opacity !== "0" && (scr.style.opacity = fl);
+      const g = hash(Math.floor(t*30) + 7) > .97 ? (hash(t)-.5)*24 : 0; scr.style.transform = `translateX(${g}px)`;
+    }};
+  },
+  barra(c) {
+    const el = TM.base(h("div", "scene")); const scr = h("div", "scr glow"); el.append(scr); TM.overlay(el);
+    const W = 26, ev = [[.2, "boot"]]; for (let i = 0; i < W; i++) ev.push([.5 + i*.07, "tickb"]); ev.push([.5 + W*.07 + .2, c.fail ? "err" : "win"]);
+    const tE = .5 + W*.07 + .2;
+    return { el, dur: tE + 2.2, events: ev, anim(t) {
+      const n = Math.floor(W * P(t, .5, W*.07)); const pct = Math.round(100 * n / W);
+      let s = `<span class="amber">${esc(c.label || "executando regressão")}</span>\n\n[${"█".repeat(n)}${"░".repeat(W - n)}] ${pct}%\n\n`;
+      if (t > tE) s += c.fail ? `<span class="red huge">${esc(c.result || "FALHOU")}</span>\n\n<span class="red">${esc(c.detail || "")}</span>` : `<span class="huge">${esc(c.result || "PASSOU")}</span>\n\n<span>${esc(c.detail || "")}</span>`;
+      scr.innerHTML = s; scr.style.opacity = .92 + .08*hash(Math.floor(t*30));
+      const g = t > tE && t < tE + .3 ? (hash(t*50)-.5)*40 : 0; scr.style.transform = `translateX(${g}px)`;
+    }};
+  },
+  fim(c) {
+    const el = TM.base(h("div", "scene")); const scr = h("div", "scr glow", "", "top:560px"); el.append(scr); TM.overlay(el);
+    const full = c.lines.join("\n"), dur = Math.min(2.2, full.length*.045), ev = [];
+    for (let i = 0; i < full.length; i += 1) if (full[i] !== "\n") ev.push([.3 + dur*i/full.length, "key"]);
+    const tU = .3 + dur + .3; ev.push([tU, "win"]);
+    return { el, dur: tU + 2.2, events: ev, anim(t) {
+      const n = Math.floor(full.length * P(t, .3, dur));
+      scr.innerHTML = `<span class="huge">${esc(full.slice(0, n))}</span>` + (t > tU ? `\n\n<span class="amber" style="font-size:56px">&gt; ${esc(c.url || "testcaseai.com.br")}</span>` : "") + `<span class="cur" style="opacity:${Math.floor(t*2.5) % 2 ? 0 : 1}"></span>`;
+      if (c.sub && t > tU + .4) scr.innerHTML += `\n\n<span class="dim">${esc(c.sub)}</span>`;
+      scr.style.opacity = .92 + .08*hash(Math.floor(t*30));
+    }};
+  }
+};
+
+/* ================= CHAT ================= */
+const COLORS = ["#F79009", "#12B76A", "#7A5AF8", "#EE46BC", "#2E90FA"];
+const CH = {
+  chat(c) {
+    const el = h("div", "scene ch");
+    const mem = c.members || {}; const names = Object.keys(mem);
+    const top = h("div", "top", `<div class="grp">${esc((c.title || "S")[0])}</div><div><div class="gname">${esc(c.title || "Squad")}</div><div class="gsub">${esc(names.join(", "))}</div></div>`); el.append(top);
+    const feed = h("div", "feed"); const inner = h("div", "inner"); feed.append(inner); el.append(feed);
+    let tt = .6; const ms = [], ev = [];
+    c.messages.forEach(m => {
+      const me = m.from === c.me; const col = mem[m.from] || COLORS[names.indexOf(m.from) % COLORS.length];
+      const row = h("div", "msg" + (me ? " me" : ""));
+      if (m.sys) { const s = h("div", "sys", esc(m.text)); inner.append(s); ms.push({ el: s, a: tt, sys: true }); ev.push([tt, "pling"]); tt += 1.0; return; }
+      const av = h("div", "av", esc(m.from[0]), `background:${col}`); const bub = h("div", "bub", (me ? "" : `<span class="who" style="color:${col}">${esc(m.from)}</span>`) + esc(m.text));
+      const typ = h("div", "typing", "<i></i><i></i><i></i>");
+      row.append(av); row.append(typ); row.append(bub); inner.append(row);
+      const tw = me ? 0 : Math.min(1.1, .45 + m.text.length*.012);
+      ms.push({ el: row, bub, typ, a: tt, tw, me }); ev.push([tt + tw, me ? "send" : "recv"]);
+      tt += tw + Math.max(.9, Math.min(2.2, m.text.length*.035)) + (m.pause || 0);
+    });
+    return { el, dur: tt + (c.hold || 1.0), events: ev, anim(t) {
+      ms.forEach(m => { const vis = t >= m.a; m.el.style.display = vis ? "" : "none"; if (!vis || m.sys) { if (m.sys && vis) m.el.style.opacity = eOut(P(t, m.a, .3)); return; }
+        const typing = t < m.a + m.tw; m.typ.style.display = typing ? "inline-flex" : "none"; m.bub.style.display = typing ? "none" : "";
+        if (typing) [...m.typ.children].forEach((d, i) => d.style.transform = `translateY(${-10*Math.max(0, Math.sin((t*7) - i*.8))}px)`);
+        const k = eBack(P(t, m.a + m.tw, .35)); if (!typing) { m.bub.style.transform = `scale(${.7 + .3*k})`; m.bub.style.transformOrigin = m.me ? "right bottom" : "left bottom"; }
+        m.el.style.opacity = clamp(P(t, m.a, .2)); });
+      // auto-scroll: manter a última mensagem visível
+      const H = 1920 - 250 - 380; const total = inner.scrollHeight; const target = Math.min(0, H - total);
+      const cur = parseFloat(inner.dataset.y || "40"); const y = cur + (target - cur)*.25; inner.dataset.y = y; inner.style.top = y + "px";
+    }};
+  },
+  fim(c) {
+    const el = h("div", "scene ch"); const end = h("div", "end"); el.append(end);
+    const T = h("div", "abs t", c.lines.map(l => words(l)).join("<br>"), "left:80px; top:560px; width:920px"); end.append(T);
+    const S = c.sub ? h("div", "abs s", esc(c.sub), "left:84px; top:1000px; width:900px") : null; if (S) end.append(S);
+    const U = h("div", "abs", `<span class="u">${esc(c.url || "testcaseai.com.br →")}</span>`, "left:80px; top:1230px"); end.append(U);
+    const ws = [...T.querySelectorAll(".w")], tU = .3 + ws.length*.12 + .5;
+    const ev = [[0, "send"]].concat(ws.map((_, i) => [.3 + i*.12, "pop", 600 + i*60]), [[tU, "chimeLo"]]);
+    return { el, dur: tU + 2.0, events: ev, anim(t) {
+      end.style.clipPath = `circle(${eInOut(P(t, 0, .5))*150}% at 85% 92%)`;
+      ws.forEach((w, i) => { const k = eOut(P(t, .3 + i*.12, .4)); w.style.opacity = k; w.style.transform = `translateY(${(1-k)*60}px)`; });
+      if (S) { const k = eOut(P(t, tU - .3, .4)); S.style.opacity = k; }
+      const k = eBack(P(t, tU, .45)); U.style.opacity = clamp(k); U.style.transform = `scale(${.8 + .2*k})`; U.style.transformOrigin = "left center";
+    }};
+  }
+};
+
+/* ================= QUADRO BRANCO ================= */
+// desenha um traço SVG "à mão" (leve tremor) e anima o stroke-dashoffset
+const wob = (pts, seed) => pts.map(([x, y], i) => [x + 3.5*Math.sin(i*.09 + seed*1.7) + 1.5*Math.sin(i*.31 + seed), y + 3.5*Math.cos(i*.08 + seed*2.3) + 1.5*Math.sin(i*.27 + seed*.5)]);
+const pathD = pts => "M" + pts.map(p => p.join(" ")).join(" L");
+function inkPath(svg, d, color, w) { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", d); p.setAttribute("fill", "none"); p.setAttribute("stroke", color); p.setAttribute("stroke-width", w); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round"); svg.append(p); const L = p.getTotalLength ? 4000 : 4000; p.style.strokeDasharray = L; p.style.strokeDashoffset = L; return p; }
+const drawP = (p, k) => { const L = parseFloat(p.style.strokeDasharray); p.style.strokeDashoffset = L * (1 - k); };
+function svgLayer(el) { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("class", "ink"); s.setAttribute("width", "1080"); s.setAttribute("height", "1920"); el.append(s); return s; }
+const boxD = (x, y, w, hh, sd) => { const r = 26; const pts = []; const seg = 40;
+  const add = (x1, y1, x2, y2) => { for (let i = 0; i <= seg; i++) pts.push([x1 + (x2-x1)*i/seg, y1 + (y2-y1)*i/seg]); };
+  add(x+r, y, x+w-r, y); add(x+w, y+r, x+w, y+hh-r); add(x+w-r, y+hh, x+r, y+hh); add(x, y+hh-r, x, y+r+8); return pathD(wob(pts, sd)); };
+const ellD = (cx, cy, rx, ry, sd) => { const pts = []; for (let i = 0; i <= 80; i++) { const a = -0.4 + i/80*Math.PI*2.15; pts.push([cx + Math.cos(a)*rx*(1 + .04*Math.sin(i*.3)), cy + Math.sin(a)*ry]); } return pathD(wob(pts, sd)); };
+const QB = {
+  base(el) { el.classList.add("qb"); el.append(h("div", "dots")); return el; },
+  write(e, t, a, d) { const k = P(t, a, d); e.style.clipPath = `inset(-20px ${100 - k*100}% -20px -20px)`; },
+  rabisco(c) {
+    const el = QB.base(h("div", "scene")); const svg = svgLayer(el);
+    const L = c.lines.map((l, i) => { const e = h("div", "abs hw xl", esc(l), `left:90px; top:${680 + i*135}px; transform:rotate(-2deg)`); el.append(e); return e; });
+    const yU = 680 + c.lines.length*135 + 30; const und = inkPath(svg, pathD(wob(Array.from({length: 30}, (_, i) => [90 + i*28, yU + Math.sin(i*.5)*8]), 3)), "#D92D20", 14);
+    const sub = c.sub ? h("div", "abs hw md", esc(c.sub), `left:100px; top:${yU + 70}px; color:#1570EF; transform:rotate(-2deg)`) : null; if (sub) el.append(sub);
+    const ev = L.map((_, i) => [.2 + i*.7, "marker", .6]).concat([[.2 + L.length*.7, "squeak"]]); if (sub) ev.push([.2 + L.length*.7 + .6, "marker", .5]);
+    const tU = .2 + L.length*.7;
+    return { el, dur: tU + (sub ? 2.4 : 1.6), events: ev, anim(t) { L.forEach((e, i) => QB.write(e, t, .2 + i*.7, .6)); drawP(und, eOut(P(t, tU, .5))); if (sub) QB.write(sub, t, tU + .6, .5); }};
+  },
+  passos(c) {
+    const el = QB.base(h("div", "scene")); const svg = svgLayer(el);
+    const T = h("div", "abs hw lg", esc(c.title), "left:90px; top:420px; width:900px"); el.append(T);
+    const n = c.steps.length, bh = 170, gap = 100, y0 = 640; const items = [];
+    c.steps.forEach((s, i) => { const y = y0 + i*(bh + gap);
+      const bx = inkPath(svg, boxD(140, y, 800, bh, i*7), "#1D2A6B", 8);
+      const tx = h("div", "abs hw md", esc(s), `left:190px; top:${y + 50}px; width:720px`); el.append(tx);
+      const ar = i < n - 1 ? inkPath(svg, pathD(wob([[540, y + bh + 15], [540, y + bh + gap - 20]], i*3)) + ` M520 ${y + bh + gap - 45} L540 ${y + bh + gap - 18} L562 ${y + bh + gap - 45}`, "#1570EF", 9) : null;
+      items.push({ bx, tx, ar, a: .7 + i*1.0 }); });
+    const ev = [[.1, "marker", .5]].concat(items.flatMap((it, i) => [[it.a, "marker", .5], [it.a + .5, "marker", .3], [it.a + .8, "squeak"]]));
+    return { el, dur: .7 + n*1.0 + 1.4, events: ev, anim(t) { QB.write(T, t, .1, .5); items.forEach(it => { drawP(it.bx, eInOut(P(t, it.a, .5))); QB.write(it.tx, t, it.a + .45, .4); if (it.ar) drawP(it.ar, eOut(P(t, it.a + .8, .3))); }); }};
+  },
+  risca(c) {
+    const el = QB.base(h("div", "scene")); const svg = svgLayer(el);
+    const lb = h("div", "abs hw sm", esc(c.badLabel || "Assim não:"), "left:90px; top:500px; color:#667085"); el.append(lb);
+    const bad = h("div", "abs hw lg", esc(c.bad), "left:90px; top:560px; width:900px; color:#1D2A6B"); el.append(bad);
+    const x1 = inkPath(svg, pathD(wob(Array.from({length:40},(_, i)=>[90 + i*21, 610 + i*4]), 9)), "#D92D20", 16), x2 = inkPath(svg, pathD(wob(Array.from({length:40},(_, i)=>[90 + i*21, 770 - i*4]), 11)), "#D92D20", 16);
+    const lg = h("div", "abs hw sm", esc(c.goodLabel || "Assim sim:"), "left:90px; top:940px; color:#667085"); el.append(lg);
+    const good = h("div", "abs hw lg", esc(c.good), "left:90px; top:1000px; width:880px; color:#079455"); el.append(good);
+    const circ = inkPath(svg, ellD(530, 1090, 500, 150, 4), "#079455", 10);
+    const sub = c.sub ? h("div", "abs hw md", esc(c.sub), "left:100px; top:1310px; width:880px; color:#1570EF; transform:rotate(-1.5deg)") : null; if (sub) el.append(sub);
+    const ev = [[.1, "marker", .4], [.3, "marker", .8], [1.4, "scribble"], [1.75, "scribble"], [2.3, "marker", .4], [2.5, "marker", .9], [3.5, "squeak"]]; if (sub) ev.push([4.3, "marker", .7]);
+    return { el, dur: sub ? 6.0 : 5.0, events: ev, anim(t) { QB.write(lb, t, .1, .3); QB.write(bad, t, .3, .8); drawP(x1, eOut(P(t, 1.4, .3))); drawP(x2, eOut(P(t, 1.75, .3)));
+      QB.write(lg, t, 2.3, .3); QB.write(good, t, 2.5, .9); drawP(circ, eInOut(P(t, 3.5, .7))); if (sub) QB.write(sub, t, 4.3, .7); }};
+  },
+  checklist(c) {
+    const el = QB.base(h("div", "scene")); const svg = svgLayer(el);
+    const T = h("div", "abs hw lg", esc(c.title), "left:90px; top:460px; width:900px"); el.append(T);
+    const its = c.items.map((it, i) => { const y = 700 + i*190; const bx = inkPath(svg, boxD(100, y, 90, 90, 20 + i), "#1D2A6B", 7);
+      const ck = inkPath(svg, pathD(wob([[118, y + 45], [140, y + 75], [200, y - 10]], 30 + i)), "#079455", 12);
+      const tx = h("div", "abs hw md", esc(it), `left:240px; top:${y + 10}px; width:760px`); el.append(tx); return { bx, ck, tx, a: .6 + i*.9 }; });
+    const ev = [[.1, "marker", .5]].concat(its.flatMap(it => [[it.a, "marker", .3], [it.a + .3, "marker", .5], [it.a + .75, "tick_pen"]]));
+    return { el, dur: .6 + its.length*.9 + 1.2, events: ev, anim(t) { QB.write(T, t, .1, .5); its.forEach(it => { drawP(it.bx, eOut(P(t, it.a, .3))); QB.write(it.tx, t, it.a + .3, .45); drawP(it.ck, eOut(P(t, it.a + .75, .25))); }); }};
+  },
+  fim(c) {
+    const el = QB.base(h("div", "scene")); const svg = svgLayer(el);
+    const L = c.lines.map((l, i) => { const e = h("div", "abs hw xl", esc(l), `left:90px; top:${680 + i*135}px`); el.append(e); return e; });
+    const yU = 680 + c.lines.length*135 + 60;
+    const u = h("div", "abs hw lg", esc(c.url || "testcaseai.com.br"), `left:150px; top:${yU + 30}px; color:#1570EF`); el.append(u);
+    const circ = inkPath(svg, ellD(470, yU + 75, 420, 95, 2), "#D92D20", 10);
+    const ar = inkPath(svg, pathD(wob([[80, yU - 60], [120, yU + 20]], 5)) + ` M95 ${yU + 5} L122 ${yU + 24} L128 ${yU - 8}`, "#D92D20", 9);
+    const ev = L.map((_, i) => [.2 + i*.7, "marker", .6]).concat([[.2 + L.length*.7, "marker", .6], [.2 + L.length*.7 + .7, "squeak"], [.2 + L.length*.7 + 1.3, "strum_end"]]);
+    const tU = .2 + L.length*.7;
+    return { el, dur: tU + 3.0, events: ev, anim(t) { L.forEach((e, i) => QB.write(e, t, .2 + i*.7, .6)); QB.write(u, t, tU, .6); drawP(circ, eInOut(P(t, tU + .7, .6))); drawP(ar, eOut(P(t, tU + 1.3, .3))); }};
+  }
+};
+
+/* ================= TRAILER ================= */
+const TR = {
+  base(el, n) { el.classList.add("tr"); el.append(h("div", "haze")); const ds = [];
+    for (let i = 0; i < (n || 26); i++) { const d = h("div", "dust", "", `left:${hash(i)*1080}px; top:${250 + hash(i+9)*1420}px; opacity:${.15 + hash(i+3)*.4}; transform:scale(${.5 + hash(i+5)*1.5})`); el.append(d); ds.push(d); }
+    const bars = h("div", "bars", "", "position:absolute; inset:0"); el.append(bars); const fl = h("div", "flash"); el.append(fl); return { ds, fl }; },
+  driftDust(ds, t) { ds.forEach((d, i) => { d.style.translate = `${Math.sin(t*.3 + i)*20}px ${-t*(8 + hash(i)*14)}px`; }); },
+  card(c) {
+    const el = h("div", "scene"); const { ds } = TR.base(el);
+    const T = h("div", "ttl c1", c.lines.map(esc).join("<br>"), `top:${c.top || 830}px`); el.append(T);
+    const d = c.dur || 2.6;
+    return { el, dur: d, events: [[0, c.hit ? "boom" : "swell"]], anim(t) { TR.driftDust(ds, t); T.style.opacity = Math.min(eOut(P(t, .2, .7)), 1 - P(t, d - .6, .5)); T.style.transform = `scale(${1 + t*.02})`; T.style.letterSpacing = (.14 + t*.01) + "em"; }};
+  },
+  flash(c) {
+    const el = h("div", "scene"); const { fl } = TR.base(el, 0);
+    const W = c.words.map(w => { const e = h("div", "ttl c2", esc(w), "top:860px; opacity:0"); el.append(e); return e; });
+    const st = .55, ev = W.map((_, i) => [.1 + i*st, "braam_s"]);
+    return { el, dur: .1 + W.length*st + .2, events: ev, anim(t) { const i = Math.floor((t - .1)/st);
+      W.forEach((e, j) => { e.style.opacity = j === i ? 1 : 0; e.style.transform = `scale(${1.15 - .15*P(t, .1 + j*st, st)})`; });
+      const f = (t - .1) % st; fl.style.opacity = t > .1 && f < .06 ? .85 : 0; }};
+  },
+  titulo(c) {
+    const el = h("div", "scene"); const { ds, fl } = TR.base(el);
+    const T = h("div", "ttl c2", esc(c.title), "top:760px; font-size:200px"); el.append(T);
+    const S = c.sub ? h("div", "ttl c3", esc(c.sub), "top:1010px") : null; if (S) el.append(S);
+    const sweep = h("div", "", "", "position:absolute; top:700px; height:340px; width:260px; background:linear-gradient(90deg, transparent, rgba(255,240,210,.55), transparent); filter:blur(18px); mix-blend-mode:screen"); el.append(sweep);
+    return { el, dur: 4.2, events: [[0, "riser"], [1.2, "braam"], [2.4, "swell"]], anim(t) { TR.driftDust(ds, t);
+      const k = P(t, 1.2, .05); T.style.opacity = k; T.style.transform = `scale(${1.08 - .06*eOut(P(t, 1.2, 2.5))})`; fl.style.opacity = t > 1.18 && t < 1.32 ? (1 - P(t, 1.2, .12)) : 0;
+      sweep.style.left = (-300 + 1700*eInOut(P(t, 1.5, 1.4))) + "px"; if (S) S.style.opacity = eOut(P(t, 2.4, .8)); }};
+  },
+  fim(c) {
+    const el = h("div", "scene"); const { ds } = TR.base(el);
+    const box = h("div", "", "", "position:absolute; left:60px; right:60px; top:640px; display:flex; flex-direction:column; align-items:center; gap:46px"); el.append(box);
+    const T = h("div", "ttl c2", c.lines.map(esc).join("<br>"), "position:relative; left:0; right:0; font-size:96px; line-height:1.15; letter-spacing:.04em"); box.append(T);
+    const S = c.sub ? h("div", "ttl c3", esc(c.sub), "position:relative; left:0; right:0") : null; if (S) box.append(S);
+    const U = h("div", "ttl url", esc(c.url || "testcaseai.com.br"), "position:relative; left:0; right:0"); box.append(U);
+    return { el, dur: 4.4, events: [[0, "boom"], [1.6, "swell"]], anim(t) { TR.driftDust(ds, t);
+      T.style.opacity = eOut(P(t, .1, .8)); T.style.transform = `scale(${1.03 - .03*eOut(P(t, 0, 3))})`;
+      if (S) S.style.opacity = eOut(P(t, 1.0, .7)); U.style.opacity = eOut(P(t, 1.6, .7)); }};
+  }
+};
+
+/* ================= POP GEOMÉTRICO ================= */
+const PAL = ["#FF5CA8", "#C6F432", "#3D5AFE", "#FFB800", "#00C2A8"];
+const spring = (x) => x <= 0 ? 0 : 1 - Math.exp(-6*x) * Math.cos(14*x);
+const PP = {
+  base(el, bg, seed) { el.classList.add("pp"); el.style.background = bg; const sh = [];
+    for (let i = 0; i < 6; i++) { const col = PAL[(seed + i + 1) % PAL.length], sz = 120 + hash(seed*7 + i)*220, kind = i % 3;
+      const st = `left:${hash(seed + i*3)*960 - 60}px; top:${(i < 3 ? 120 + hash(seed + i)*260 : 1380 + hash(seed + i*5)*300)}px; width:${sz}px; height:${sz}px; background:${kind === 2 ? "transparent" : col};` +
+        (kind === 0 ? "border-radius:50%;" : kind === 1 ? "border-radius:28px;" : `border-left:${sz/2}px solid transparent; border-right:${sz/2}px solid transparent; border-bottom:${sz}px solid ${col}; width:0; height:0;`);
+      const e = h("div", "shape", "", st); el.append(e); sh.push({ e, a: .05 + i*.07, r: (hash(seed + i*11) - .5)*60 }); }
+    return sh; },
+  animShapes(sh, t) { sh.forEach(s => { const k = spring(t - s.a); s.e.style.transform = `scale(${k}) rotate(${s.r + t*12*(s.r > 0 ? 1 : -1)}deg)`; }); },
+  grito(c) {
+    const el = h("div", "scene"); const bg = c.bg || PAL[0], fg = c.fg || "#111"; const sh = PP.base(el, bg, c.seed || 1);
+    const T = h("div", "abs yell", c.lines.map(l => words(l)).join("<br>"), `left:90px; top:${c.top || 640}px; width:920px; color:${fg}`); el.append(T);
+    const ws = [...T.querySelectorAll(".w")], ev = [[0, "slide"]].concat(ws.map((_, i) => [.3 + i*.13, "mar", i]));
+    return { el, dur: .3 + ws.length*.13 + 1.6, events: ev, anim(t) { PP.animShapes(sh, t); ws.forEach((w, i) => { const k = spring(t - (.3 + i*.13)); w.style.transform = `scale(${k}) rotate(${(1-Math.min(1, k))*-12}deg)`; w.style.transformOrigin = "left bottom"; }); }};
+  },
+  sticker(c) {
+    const el = h("div", "scene"); const sh = PP.base(el, c.bg || PAL[2], c.seed || 3);
+    const S = h("div", "stk", `<div class="n" style="background:${c.dot || PAL[1]}">${esc(c.num)}</div><div class="k">${esc(c.kicker || "")}</div><div class="x">${esc(c.text)}</div>`); el.append(S);
+    return { el, dur: 3.0, events: [[0, "slide"], [.25, "boing"], [.75, "pop_hi"]], anim(t) { PP.animShapes(sh, t);
+      const k = spring(t - .2); S.style.transform = `translateY(${(1-Math.min(1.2, k))*400}px) rotate(${-3 + (1-Math.min(1,k))*10}deg)`; S.style.opacity = t > .2 ? 1 : 0;
+      const n = S.querySelector(".n"); const kn = spring(t - .75); n.style.transform = `scale(${kn}) rotate(${12 - 12*Math.min(1, kn)}deg)`; }};
+  },
+  fim(c) {
+    const el = h("div", "scene"); const sh = PP.base(el, c.bg || PAL[1], c.seed || 5);
+    const T = h("div", "abs yell", c.lines.map(l => words(l)).join("<br>"), "left:90px; top:600px; width:920px; color:#111"); el.append(T);
+    const yS = 600 + c.lines.length*130 + 40;
+    const S = c.sub ? h("div", "abs", esc(c.sub), `left:94px; top:${yS}px; width:880px; font-weight:500; font-size:48px; line-height:1.3; color:#111`) : null; if (S) el.append(S);
+    const U = h("div", "abs", `<span class="cta">${esc(c.url || "testcaseai.com.br →")}</span>`, `left:90px; top:${yS + (S ? 200 : 40)}px`); el.append(U);
+    const ws = [...T.querySelectorAll(".w")], tU = .3 + ws.length*.13 + .4;
+    const ev = [[0, "slide"]].concat(ws.map((_, i) => [.3 + i*.13, "mar", i + 2]), [[tU, "fanfare"]]);
+    return { el, dur: tU + 2.2, events: ev, anim(t) { PP.animShapes(sh, t); ws.forEach((w, i) => { const k = spring(t - (.3 + i*.13)); w.style.transform = `scale(${k})`; w.style.transformOrigin = "left bottom"; });
+      if (S) { const k = eOut(P(t, tU - .3, .4)); S.style.opacity = k; } const kk = spring(t - tU); U.style.transform = `scale(${kk})`; U.style.transformOrigin = "left center"; }};
+  }
+};
+
+const STYLES = { editorial: { S: ED, xfade: 0 }, terminal: { S: TM, xfade: .12 }, chat: { S: CH, xfade: .25 }, quadro: { S: QB, xfade: .3 }, trailer: { S: TR, xfade: .0 }, pop: { S: PP, xfade: 0 } };
+let TL = [], TOTAL = 0, EVENTS = [], STYLE = "editorial";
+function build(cfg) {
+  STYLE = cfg.style; const st = STYLES[cfg.style]; $("scenes").innerHTML = ""; TL = []; EVENTS = []; let t = 0; const X = st.xfade;
+  cfg.scenes.forEach((sc, i) => {
+    const s = st.S[sc.type](sc); $("scenes").append(s.el); TL.push({ s, start: t, end: t + s.dur });
+    s.events.forEach(([et, k, a]) => EVENTS.push([t + et, k, a])); t += s.dur - X;
+  });
+  TOTAL = t + X; window.TOTAL = TOTAL; window.EVENTS = EVENTS; window.STYLE = STYLE;
+}
+function render(t) {
+  const X = STYLES[STYLE].xfade;
+  TL.forEach(({ s, start, end }, i) => {
+    const on = t >= start && t <= end; let a = 1;
+    if (X > 0) a = Math.min(i === 0 ? 1 : eOut(P(t, start, X)), i === TL.length - 1 ? 1 : 1 - P(t, end - X, X));
+    s.el.style.opacity = on ? a : 0; if (on) s.anim(t - start);
+  });
+}
+window.build = build; window.render = render;
+build(JSON.parse($("config").textContent)); render(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{"style":"editorial","scenes":[
+{"type":"manchete","kicker":"QA · edição de sexta","lines":["Funcionou","na minha","máquina."],"color":"#FFD23F","sub":"A frase mais famosa antes de um bug em produção."},
+{"type":"versus","aLabel":"Sem processo","a":"“Testei aqui, tá ok.”","bLabel":"Com processo","b":"Evidência salva por execução.","color":"#FFD23F"},
+{"type":"lista","kicker":"Antes do deploy","title":"3 perguntas","items":["Em qual ambiente rodou?","Onde está a evidência?","E o caso de erro?"],"lastColor":"#E8452C"},
+{"type":"carimbo","title":"Sem evidência, não está testado.","stamp":"Reprovado","color":"#E8452C"},
+{"type":"fim","lines":["Qualidade","com prova."],"url":"testcaseai.com.br","sub":"Do requisito ao release, sem lacunas."}
+]}

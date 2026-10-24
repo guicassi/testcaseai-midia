@@ -1,0 +1,9 @@
+{
+  "ordem": ["editorial", "terminal", "chat", "quadro", "trailer", "pop", "classico"],
+  "ultimo": "classico",
+  "historico": [
+    {"data": "2026-10-18", "estilo": "classico", "tema": "Antes x Depois"},
+    {"data": "2026-10-22", "estilo": "classico", "tema": "Cadê a evidência?"},
+    {"data": "2026-10-25", "estilo": "classico", "tema": "Antes de dizer testado"}
+  ]
+}

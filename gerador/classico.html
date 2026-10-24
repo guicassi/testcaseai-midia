@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Reels testcaseAI</title>
+<style>
+  :root { --bg:#070B1E; --g1:#9150F8; --g2:#1B6BF8; --accent:#1BB2F8; --muted:#A9B1D6; --soft:#C9CEE6; --bad:#FF6B81; --page:#0B0F24; --ink:#FAFAFA; }
+  :root[data-theme="light"] { --page:#F4F5FA; --ink:#0B1026; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --page:#F4F5FA; --ink:#0B1026; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page); color: var(--ink); font-family: "Inter", system-ui, sans-serif; }
+  body.preview { display: grid; place-items: center; min-height: 100vh; padding: 16px; gap: 16px; }
+  body.preview #wrap { width: min(100%, 405px); aspect-ratio: 9/16; position: relative; overflow: hidden; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+  body.preview #stage { transform-origin: top left; }
+  body.preview .ctrl { display: flex; gap: 12px; align-items: center; font-size: 14px; }
+  body.preview button { font: inherit; padding: 8px 16px; border-radius: 999px; border: 1px solid #597CFF; background: transparent; color: inherit; cursor: pointer; }
+  body.render .ctrl, body.render h1, body.render p.note { display: none; }
+  body.render { background: #070B1E; width: 1080px; height: 1920px; overflow: hidden; }
+  h1 { font-size: 18px; } p.note { font-size: 13px; opacity: .75; max-width: 405px; text-align: center; }
+
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); color: #FAFAFA; font-family: "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(120px); }
+  #g1 { width: 900px; height: 900px; background: var(--g1); opacity: .45; }
+  #g2 { width: 1000px; height: 1000px; background: var(--g2); opacity: .40; }
+  #grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(120,140,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(120,140,255,.06) 1px, transparent 1px); background-size: 72px 72px; }
+  #vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(4,6,18,.75) 100%); }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .abs { position: absolute; }
+  .h1 { font-weight: 700; font-size: 128px; line-height: 1.02; letter-spacing: -0.045em; }
+  .h2 { font-weight: 700; font-size: 92px; line-height: 1.05; letter-spacing: -0.04em; }
+  .lead { font-weight: 500; font-size: 46px; line-height: 1.35; letter-spacing: -0.02em; color: var(--soft); }
+  .eyebrow { font-weight: 600; font-size: 40px; letter-spacing: -0.01em; color: var(--muted); left: 90px; top: 470px; }
+  .accent { color: var(--accent); }
+  .word { display: inline-block; }
+  .card { position: absolute; left: 70px; top: 560px; width: 940px; border-radius: 36px; padding: 56px 56px 60px; }
+  .card.bad { background: rgba(255,107,129,.07); border: 3px solid var(--bad); box-shadow: 0 30px 80px rgba(255,107,129,.12); }
+  .card.good { background: rgba(27,178,248,.08); border: 3px solid var(--accent); box-shadow: 0 30px 80px rgba(27,178,248,.15); }
+  .tag { font-weight: 700; font-size: 36px; letter-spacing: .02em; margin-bottom: 26px; }
+  .tag.bad { color: var(--bad); } .tag.good { color: var(--accent); }
+  .quote { font-weight: 650; font-size: 70px; line-height: 1.18; letter-spacing: -0.035em; }
+  .mark { position: relative; display: inline-block; }
+  .mark::after { content: ""; position: absolute; left: -6px; right: -6px; bottom: 6px; height: 22px; background: var(--bad); opacity: .45; border-radius: 6px; transform-origin: left center; transform: scaleX(var(--s,0)); z-index: -1; }
+  .chip { position: absolute; left: 90px; display: inline-flex; align-items: center; gap: 26px; padding: 30px 44px; border-radius: 999px; background: rgba(255,255,255,.06); border: 2px solid rgba(169,177,214,.35); font-weight: 650; font-size: 60px; letter-spacing: -0.03em; max-width: 920px; }
+  .chip .q { flex: 0 0 74px; height: 74px; border-radius: 50%; background: var(--bad); color: #070B1E; display: grid; place-items: center; font-weight: 800; font-size: 48px; }
+  .row { display: flex; gap: 26px; align-items: flex-start; font-weight: 500; font-size: 48px; line-height: 1.3; letter-spacing: -0.02em; margin-top: 34px; }
+  .row .ck { flex: 0 0 64px; height: 64px; border-radius: 18px; background: var(--accent); color: #070B1E; display: grid; place-items: center; font-weight: 800; font-size: 40px; }
+  .row b { font-weight: 700; color: #FFF; }
+  .win { position: absolute; left: 60px; top: 560px; width: 960px; border-radius: 34px; background: #0B1029; border: 2px solid #3A4FA8; overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,.55); }
+  .win .bar { height: 92px; display: flex; align-items: center; gap: 16px; padding: 0 36px; border-bottom: 2px solid #26336F; background: #0E1434; }
+  .win .dot { width: 26px; height: 26px; border-radius: 50%; }
+  .win .fname { margin-left: 22px; font-family: "DejaVu Sans Mono", monospace; font-size: 30px; color: #8B93B8; }
+  .code { padding: 44px 44px 56px; font-family: "DejaVu Sans Mono", monospace; font-size: 38px; line-height: 1.75; white-space: pre-wrap; color: #E6E9F5; min-height: 430px; }
+  .kw { color: var(--accent); font-weight: 700; } .kw2 { color: #B38BFF; font-weight: 700; }
+  .cursor { display: inline-block; width: 20px; height: 44px; background: var(--accent); vertical-align: -8px; margin-left: 2px; }
+  .num { font-weight: 800; font-size: 440px; line-height: .95; letter-spacing: -0.06em; color: var(--accent); }
+  .qmark { font-weight: 800; font-size: 320px; line-height: 1; color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; gap: 18px; padding: 34px 54px; border-radius: 999px; background: linear-gradient(90deg, #1BB2F8, #597CFF 55%, #9150F8); font-weight: 750; font-size: 50px; letter-spacing: -0.02em; color: #FFF; box-shadow: 0 20px 60px rgba(89,124,255,.45); }
+  #brand { position: absolute; left: 90px; top: 1490px; font-size: 30px; color: var(--soft); }
+  #brand b { color: #FFF; font-weight: 700; }
+  #progress { position: absolute; left: 90px; right: 90px; top: 1560px; height: 6px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+  #progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #1BB2F8, #9150F8); }
+
+  .stack { position: absolute; left: 70px; width: 940px; display: flex; flex-direction: column; }
+  .opt { position: relative; width: 940px; display: flex; align-items: center; gap: 30px; padding: 34px 40px; border-radius: 30px; background: rgba(255,255,255,.06); border: 3px solid rgba(169,177,214,.35); font-weight: 650; font-size: 54px; letter-spacing: -0.025em; line-height: 1.15; }
+  .opt .L { flex: 0 0 84px; height: 84px; border-radius: 22px; background: rgba(255,255,255,.12); display: grid; place-items: center; font-weight: 800; font-size: 46px; }
+  .opt.ok { border-color: #33D69F; background: rgba(51,214,159,.14); box-shadow: 0 20px 70px rgba(51,214,159,.25); }
+  .opt.ok .L { background: #33D69F; color: #070B1E; }
+  .opt.no { opacity: .35; }
+  .timer { position: relative; width: 190px; height: 190px; margin: 40px auto 0; display: grid; place-items: center; font-weight: 800; font-size: 96px; }
+  .timer svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .pov { display: inline-block; padding: 14px 34px; border-radius: 18px; background: var(--accent); color: #070B1E; font-weight: 800; font-size: 56px; letter-spacing: .02em; }
+  .emoji { font-size: 200px; line-height: 1; }
+  .node { position: relative; margin-left: 80px; width: 780px; padding: 24px 36px; border-radius: 28px; background: rgba(255,255,255,.07); border: 3px solid rgba(169,177,214,.4); font-weight: 650; font-size: 48px; letter-spacing: -0.02em; line-height: 1.2; }
+  .node.badn { border-color: var(--bad); background: rgba(255,107,129,.12); color: #FFD3DA; }
+  .node .st { display: block; font-size: 30px; font-weight: 700; letter-spacing: .04em; color: var(--muted); margin-bottom: 8px; }
+  .node.badn .st { color: var(--bad); }
+  .arrow { position: relative; margin-left: 467px; height: 34px; width: 6px; background: linear-gradient(var(--accent), #9150F8); border-radius: 6px; transform-origin: top; }
+  .shotwin { position: absolute; left: 50px; width: 980px; border-radius: 28px; overflow: hidden; border: 2px solid #3A4FA8; background: #0B1029; box-shadow: 0 40px 120px rgba(0,0,0,.6); }
+  .shotwin .bar { height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 26px; background: #0E1434; border-bottom: 2px solid #26336F; }
+  .shotwin .dot { width: 18px; height: 18px; border-radius: 50%; }
+  .shotview { position: relative; width: 980px; height: 620px; overflow: hidden; }
+  .shotview img { position: absolute; left: 0; top: 0; width: 980px; transform-origin: 0 0; }
+  .hl { position: absolute; border: 5px solid var(--accent); border-radius: 18px; box-shadow: 0 0 0 4000px rgba(4,6,18,.55), 0 0 40px rgba(27,178,248,.6); }
+  .ptr { position: absolute; width: 70px; height: 70px; }
+  .ring { position: absolute; width: 90px; height: 90px; border-radius: 50%; border: 5px solid var(--accent); }
+</style>
+</head>
+<body class="preview">
+<h1>Gerador de Reels testcaseAI</h1>
+<div id="wrap"><div id="stage">
+  <div id="g1" class="glow"></div><div id="g2" class="glow"></div><div id="grid"></div><div id="vignette"></div>
+  <div id="scenes"></div>
+  <div id="brand"><b>testcaseAI</b> &nbsp;·&nbsp; Do requisito ao release, sem lacunas de qualidade.</div>
+  <div id="progress"><i id="pbar"></i></div>
+</div></div>
+<div class="ctrl"><button id="play">▶ Reproduzir prévia</button><span id="time">0,0 s</span></div>
+<p class="note">Prévia sem som. O vídeo final (MP4 1080x1920 com trilha e efeitos) é gerado pelo script embutido nesta página.</p>
+
+<!-- ROTEIRO DE EXEMPLO (substituído pelo script ao renderizar) -->
+<script type="application/json" id="config">
+{
+  "theme": "dark",
+  "scenes": [
+    {"type": "hook", "lines": ["Essa User Story", "vai virar"], "accent": "bug.", "sub": "Veja por quê, e como corrigir antes da sprint."},
+    {"type": "card", "variant": "bad", "eyebrow": "A história que chega na sprint:", "tag": "✗  ANTES · vago", "text": "“Como usuário, quero fazer login de forma rápida e segura.”", "highlight": ["rápida", "segura"]},
+    {"type": "chips", "eyebrow": "E aí, quem testa pergunta:", "items": ["“Rápido” quanto?", "E se errar a senha?", "“Segura” como?"], "punch": "Sem resposta, o teste vira chute."},
+    {"type": "checks", "eyebrow": "Reescrita de forma testável:", "tag": "✓  DEPOIS · testável", "items": ["Login válido abre o painel <b>em até 2 s</b>", "<b>3 senhas erradas</b> bloqueiam a conta por 15 min", "Usuário recebe <b>e-mail de aviso</b>"]},
+    {"type": "code", "eyebrow": "E já vira cenário de teste:", "filename": "login.feature", "lines": [["Cenário:", "bloqueio após 3 senhas erradas"], ["Dado", "que o usuário tem conta ativa"], ["Quando", "erra a senha 3 vezes"], ["Então", "a conta é bloqueada por 15 min"], ["E", "ele recebe um e-mail de aviso"]]},
+    {"type": "cta", "lines": ["Da história", "ao cenário"], "accent": "em segundos.", "sub": "O testcaseAI avalia a User Story, aponta o que falta e gera os cenários em Gherkin.", "button": "testcaseai.com.br →"}
+  ]
+}
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a=0, b=1) => Math.min(b, Math.max(a, x));
+const P = (t, a, d) => clamp((t - a) / d);
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eInOut = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2;
+const eBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(x-1,3) + c1*Math.pow(x-1,2); };
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const h = (tag, cls, html, style) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (style) e.style.cssText = style; return e; };
+const rise = (el, k, d=40) => { el.style.opacity = k; el.style.transform = `translateY(${(1-k)*d}px)`; };
+const words = (txt, cls="") => txt.split(" ").map(w => `<span class="word ${cls}">${esc(w)}</span>`).join(" ");
+
+const THEMES = {
+  dark:   { bg: "#070B1E", g1: "#9150F8", g2: "#1B6BF8", accent: "#1BB2F8" },
+  violet: { bg: "#2A1680", g1: "#9150F8", g2: "#1BB2F8", accent: "#5CD0FF" }
+};
+
+// Cada tipo de cena: build(cfg) -> { el, dur, anim(lt), events: [[t, tipo, args]] }
+const SCENES = {
+  hook(c) {
+    const el = h("div", "scene");
+    const lines = c.lines.map(l => words(l)).join("<br>") + `<br>${words(c.accent, "accent")}`;
+    const t = h("div", "abs h1", lines, "left:90px; top:610px; width:920px"); el.append(t);
+    const sub = c.sub ? h("div", "abs lead", esc(c.sub), "left:94px; top:1060px; width:900px") : null; if (sub) el.append(sub);
+    const ws = [...t.querySelectorAll(".word")], nAcc = c.accent.split(" ").length, nMain = ws.length - nAcc;
+    const tAcc = .15 + nMain * .14 + .1, ev = [];
+    ws.slice(0, nMain).forEach((_, i) => ev.push([.2 + i*.14, "pop", 700 + i*50]));
+    ev.push([tAcc + .03, "hit"], [tAcc + .5, "glitch"]); if (sub) ev.push([tAcc + .55, "whoosh_s"]);
+    return { el, dur: Math.max(2.8, tAcc + 1.7), events: ev, anim(lt) {
+      ws.forEach((w, i) => { if (i < nMain) { const k = eOut(P(lt, .15 + i*.14, .45)); w.style.opacity = k; w.style.transform = `translateY(${(1-k)*90}px)`; }
+        else { const k = eBack(P(lt, tAcc, .5)); const sh = lt > tAcc + .5 && lt < tAcc + .9 ? Math.sin(lt*90)*7 : 0; w.style.opacity = clamp(k); w.style.transform = `scale(${.6+.4*k}) translateX(${sh}px)`; w.style.transformOrigin = "left bottom"; } });
+      if (sub) rise(sub, eOut(P(lt, tAcc + .55, .5)), 30);
+    }};
+  },
+  card(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || "")); el.append(eye);
+    const v = c.variant === "good" ? "good" : "bad";
+    const card = h("div", `card ${v}`, `<div class="tag ${v}">${esc(c.tag || "")}</div>`); const q = h("div", "quote"); card.append(q); el.append(card);
+    const txt = c.text, typeDur = Math.min(1.8, Math.max(.8, txt.length * .022)), hl = c.highlight || [];
+    const tEnd = .6 + typeDur, ev = [[.27, "pop", 500]];
+    for (let k = 0; k < txt.length; k += 2) ev.push([.6 + typeDur * k / txt.length, "click"]);
+    hl.forEach((_, i) => ev.push([tEnd + .2 + i*.25, "swish"]));
+    return { el, dur: tEnd + .45 + hl.length*.25 + .7, events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .1, .4)), 30);
+      const k = eBack(P(lt, .25, .55)); card.style.opacity = clamp(k*1.4); card.style.transform = `scale(${.85+.15*k})`;
+      let s = esc(txt.slice(0, Math.floor(txt.length * P(lt, .6, typeDur))));
+      hl.forEach((w, i) => { s = s.replace(esc(w), `<span class="mark" style="--s:${eOut(P(lt, tEnd + .2 + i*.25, .45))}">${esc(w)}</span>`); });
+      q.innerHTML = s;
+    }};
+  },
+  chips(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || "")); el.append(eye);
+    const chips = c.items.map((it, i) => { const e = h("div", "chip", `<span class="q">?</span>${esc(it)}`, `top:${580 + i*180}px`); el.append(e); return e; });
+    const tP = .45 + chips.length * .42 + .3;
+    const punch = c.punch ? h("div", "abs h2 accent", esc(c.punch), `left:90px; top:${600 + chips.length*180 + 30}px; width:920px`) : null; if (punch) el.append(punch);
+    const ev = chips.map((_, i) => [.5 + i*.42, "pop", 660 + i*90]); if (punch) ev.push([tP + .05, "thud"]);
+    return { el, dur: (punch ? tP + 1.3 : tP + .9), events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .1, .4)), 30);
+      chips.forEach((e, i) => { const k = eBack(P(lt, .45 + i*.42, .5)); e.style.opacity = clamp(k*1.5); e.style.transform = `translateX(${(1-clamp(k))*-140}px) scale(${.9+.1*k})`; });
+      if (punch) rise(punch, eOut(P(lt, tP, .5)), 50);
+    }};
+  },
+  checks(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || "")); el.append(eye);
+    const card = h("div", "card good", `<div class="tag good">${esc(c.tag || "")}</div>`); el.append(card);
+    const rows = c.items.map(it => { const r = h("div", "row", `<span class="ck">✓</span><span>${it}</span>`); card.append(r); return r; });
+    const ev = [[.2, "whoosh_s"]].concat(rows.map((_, i) => [.75 + i*.5, "ding", [84, 88, 91, 96][i % 4]]));
+    return { el, dur: .7 + rows.length*.5 + 1.1, events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .1, .4)), 30);
+      const k = eOut(P(lt, .25, .55)); card.style.opacity = k; card.style.transform = `translateY(${(1-k)*120}px)`;
+      rows.forEach((r, i) => { const kk = eOut(P(lt, .7 + i*.5, .45)); r.style.opacity = kk; r.style.transform = `translateX(${(1-kk)*60}px)`; r.querySelector(".ck").style.transform = `scale(${eBack(P(lt, .75 + i*.5, .4))})`; });
+    }};
+  },
+  code(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || "")); el.append(eye);
+    const win = h("div", "win", `<div class="bar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="fname">${esc(c.filename || "cenario.feature")}</span></div>`);
+    const code = h("div", "code"); win.append(code); el.append(win);
+    const parts = []; c.lines.forEach(([kw, rest], i) => { parts.push([i === 0 ? "kw" : "kw2", (i === 0 ? "" : "  ") + kw]); parts.push(["", " " + rest + (i < c.lines.length - 1 ? "\n" : "")]); });
+    const len = parts.reduce((n, [, s]) => n + s.length, 0), tDur = Math.min(2.4, Math.max(1.2, len * .012));
+    const ev = [[.25, "pop", 400]]; for (let k = 0; k < len; k += 3) ev.push([.6 + tDur * k / len, "click"]);
+    return { el, dur: .6 + tDur + 1.0, events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .1, .4)), 30);
+      const k = eOut(P(lt, .2, .5)); win.style.opacity = k; win.style.transform = `translateY(${(1-k)*-80}px) scale(${.95+.05*k})`;
+      let n = Math.floor(len * P(lt, .6, tDur)), html = "";
+      for (const [cls, s] of parts) { if (n <= 0) break; const part = s.slice(0, n); n -= part.length; html += cls ? `<span class="${cls}">${esc(part)}</span>` : esc(part); }
+      code.innerHTML = html + `<span class="cursor" style="opacity:${Math.floor(lt*2.2) % 2 === 0 ? 1 : 0}"></span>`;
+    }};
+  },
+  number(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || ""), "top:300px"); el.append(eye);
+    const num = h("div", "abs num", "", "left:80px; top:360px"); el.append(num);
+    const label = h("div", "abs h2", esc(c.label || ""), "left:90px; top:820px; width:920px"); el.append(label);
+    const sub = c.sub ? h("div", "abs lead", esc(c.sub), "left:94px; top:1080px; width:900px") : null; if (sub) el.append(sub);
+    const target = parseFloat(String(c.value).replace(",", ".")), isNum = !isNaN(target) && /^[\d.,]+$/.test(String(c.value));
+    const ev = [[.35, "hit"], [.9, "whoosh_s"]];
+    return { el, dur: 3.2, events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .1, .4)), 30);
+      const k = eBack(P(lt, .3, .6)); num.style.opacity = clamp(k*1.3); num.style.transform = `scale(${.5+.5*k})`; num.style.transformOrigin = "left center";
+      num.textContent = isNum ? String(Math.round(target * eOut(P(lt, .3, .8)))) + (c.suffix || "") : c.value;
+      rise(label, eOut(P(lt, .9, .5)), 40); if (sub) rise(sub, eOut(P(lt, 1.3, .5)), 30);
+    }};
+  },
+  quote(c) {
+    const el = h("div", "scene");
+    const mk = h("div", "abs qmark", "“", "left:84px; top:300px"); el.append(mk);
+    const t = h("div", "abs h2", c.lines.map(l => words(l)).join("<br>") + "<br>" + (c.accent || []).map(l => words(l, "accent")).join("<br>"), "left:90px; top:620px; width:920px"); el.append(t);
+    const sign = c.sign ? h("div", "abs lead", esc(c.sign), "left:94px; top:1160px; width:900px") : null; if (sign) el.append(sign);
+    const ws = [...t.querySelectorAll(".word")]; const ev = [[.15, "hit"]]; ws.forEach((_, i) => { if (i % 2 === 0) ev.push([.55 + i*.09, "pop", 700 + i*20]); });
+    const tS = .5 + ws.length*.09 + .3;
+    return { el, dur: tS + 1.4, events: ev, anim(lt) {
+      const k = eBack(P(lt, .1, .5)); mk.style.opacity = clamp(k); mk.style.transform = `scale(${.4+.6*k}) rotate(${(1-clamp(k))*-20}deg)`;
+      ws.forEach((w, i) => { const kk = eOut(P(lt, .5 + i*.09, .45)); w.style.opacity = kk; w.style.transform = `translateY(${(1-kk)*60}px)`; });
+      if (sign) rise(sign, eOut(P(lt, tS, .5)), 30);
+    }};
+  },
+
+  quiz(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || "Quiz rápido de QA"), "top:300px"); el.append(eye);
+    const q = h("div", "abs h2", esc(c.question), "left:90px; top:370px; width:920px; font-size:76px"); el.append(q);
+    const st = h("div", "stack", "", `top:${c.top || 640}px; gap:22px`); el.append(st);
+    const opts = c.options.map((o, i) => { const e = h("div", "opt", `<span class="L">${"ABC"[i]}</span><span>${esc(o)}</span>`); st.append(e); return e; });
+    const tw = h("div", "", "", "position:relative; height:200px; margin-top:10px"); st.append(tw);
+    const timer = h("div", "timer", `<svg viewBox="0 0 190 190"><circle cx="95" cy="95" r="84" stroke="rgba(255,255,255,.15)" stroke-width="12" fill="none"/><circle class="arc" cx="95" cy="95" r="84" stroke="var(--accent)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="528" stroke-dashoffset="0"/></svg><span>3</span>`, "position:absolute; left:375px; top:0; margin:0"); tw.append(timer);
+    const exp = c.explain ? h("div", "lead", esc(c.explain), "position:absolute; left:24px; top:10px; width:900px") : null; if (exp) tw.append(exp);
+    const tO = .9, tC = tO + opts.length*.35 + .4, tR = tC + 3.0;
+    const ev = [[.15, "pop", 520]].concat(opts.map((_, i) => [tO + i*.35, "pop", 700 + i*90]), [[tC, "tick"], [tC + 1, "tick"], [tC + 2, "tick"], [tR, "correct"]]);
+    if (exp) ev.push([tR + .6, "whoosh_s"]);
+    return { el, dur: tR + (exp ? 2.8 : 1.6), events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .05, .4)), 30); rise(q, eOut(P(lt, .15, .5)), 50);
+      opts.forEach((e, i) => { const k = eBack(P(lt, tO + i*.35, .45)); e.style.opacity = clamp(k*1.5); e.style.transform = `translateX(${(1-clamp(k))*120}px)`;
+        e.classList.toggle("ok", lt >= tR && i === c.answer); e.classList.toggle("no", lt >= tR && i !== c.answer);
+        if (lt >= tR && i === c.answer) e.style.transform = `scale(${1 + .04*Math.max(0, 1 - (lt - tR)*3)})`; });
+      const show = lt >= tC - .3 && lt < tR + .15; timer.style.opacity = show ? eOut(P(lt, tC - .3, .3)) : 0;
+      const left = clamp(1 - (lt - tC)/3); timer.querySelector(".arc").setAttribute("stroke-dashoffset", String(528*(1-left)));
+      timer.querySelector("span").textContent = String(Math.max(1, 3 - Math.floor(Math.max(0, lt - tC))));
+      timer.style.transform = `scale(${1 + .12*Math.max(0, 1 - ((Math.max(0, lt - tC)) % 1)*4)})`;
+      if (exp) rise(exp, eOut(P(lt, tR + .6, .5)), 30);
+    }};
+  },
+  pov(c) {
+    const el = h("div", "scene");
+    const tag = h("div", "abs", `<span class="pov">${esc(c.label || "POV")}</span>`, "left:90px; top:520px"); el.append(tag);
+    const t = h("div", "abs h2", c.lines.map(l => words(l)).join("<br>"), "left:90px; top:650px; width:920px; font-size:84px"); el.append(t);
+    const emo = c.emoji ? h("div", "abs emoji", esc(c.emoji), "left:90px; top:1150px") : null; if (emo) el.append(emo);
+    const ws = [...t.querySelectorAll(".word")], tE = .5 + ws.length*.08 + .2;
+    const ev = [[.1, "hit"]].concat(ws.filter((_, i) => i % 2 === 0).map((_, i) => [.5 + i*.16, "pop", 760 + i*25])); if (emo) ev.push([tE, "boing"]);
+    return { el, dur: tE + 1.6, events: ev, anim(lt) {
+      const k = eBack(P(lt, .05, .4)); tag.style.opacity = clamp(k); tag.style.transform = `scale(${.5+.5*k}) rotate(${(1-clamp(k))*-8}deg)`; tag.style.transformOrigin = "left center";
+      ws.forEach((w, i) => { const kk = eOut(P(lt, .5 + i*.08, .3)); w.style.opacity = kk; w.style.transform = `translateY(${(1-kk)*40}px)`; });
+      if (emo) { const ke = eBack(P(lt, tE, .45)); emo.style.opacity = clamp(ke); emo.style.transform = `scale(${ke}) rotate(${Math.sin(lt*6)*8}deg)`; }
+      const zoom = 1 + .025*Math.min(1, lt/3); el.style.transform = `scale(${zoom})`;
+    }};
+  },
+  flow(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || ""), "top:300px"); el.append(eye);
+    const st = h("div", "stack", "", "top:360px; left:0; width:1080px"); el.append(st);
+    const n = c.steps.length, nodes = [], arrows = [];
+    c.steps.forEach((s, i) => { if (i > 0) { const a = h("div", "arrow"); st.append(a); arrows.push(a); }
+      const e = h("div", "node" + (i === c.bad ? " badn" : ""), `<span class="st">${esc(s.tag || ("PASSO " + (i+1)))}</span>${esc(s.text)}`); st.append(e); nodes.push(e); });
+    const punch = c.punch ? h("div", "h2 accent", esc(c.punch), "margin:36px 0 0 90px; width:900px; font-size:62px") : null; if (punch) st.append(punch);
+    const step = .7, ev = nodes.map((_, i) => i === c.bad ? [.4 + i*step, "buzz"] : [.4 + i*step, "pop", 600 + i*80]);
+    const tP = .4 + n*step + .2; if (punch) ev.push([tP, "thud"]);
+    return { el, dur: tP + (punch ? 1.8 : 1.0), events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .05, .4)), 30);
+      nodes.forEach((e, i) => { const k = eBack(P(lt, .4 + i*step, .45)); e.style.opacity = clamp(k*1.4);
+        const sh = i === c.bad && lt > .4 + i*step && lt < .4 + i*step + .45 ? Math.sin(lt*80)*10 : 0; e.style.transform = `translateX(${(1-clamp(k))*-100 + sh}px)`; });
+      arrows.forEach((a, i) => { a.style.transform = `scaleY(${eOut(P(lt, .4 + i*step + .3, .35))})`; });
+      if (punch) rise(punch, eOut(P(lt, tP, .5)), 40);
+    }};
+  },
+  shot(c) {
+    const el = h("div", "scene"); const eye = h("div", "abs eyebrow", esc(c.eyebrow || ""), "top:300px"); el.append(eye);
+    const ttl = c.title ? h("div", "abs h2", esc(c.title), "left:90px; top:360px; width:920px; font-size:72px") : null; if (ttl) el.append(ttl);
+    const win = h("div", "shotwin", `<div class="bar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span></div>`, "top:620px");
+    const view = h("div", "shotview"); const img = h("img"); img.src = c.image; view.append(img); win.append(view); el.append(win);
+    const Z = c.zoom || { x: 0, y: 0, w: 1, h: 1 }; // fração da imagem
+    const hlb = c.highlight ? h("div", "hl") : null; if (hlb) { hlb.style.opacity = 0; view.append(hlb); }
+    const ptr = h("div", "ptr", `<svg viewBox="0 0 24 24" width="70" height="70"><path d="M3 2 L3 19 L8 14.5 L11.5 22 L14.5 20.6 L11 13.3 L17.5 13.3 Z" fill="#fff" stroke="#070B1E" stroke-width="1.4"/></svg>`); view.append(ptr);
+    const ring = h("div", "ring"); ring.style.opacity = 0; view.append(ring);
+    const cap = c.caption ? h("div", "abs lead", esc(c.caption), "left:94px; top:1290px; width:900px; color:#fff; font-weight:650") : null; if (cap) el.append(cap);
+    const tZ = .6, tZd = 1.6, tPtr = tZ + tZd, tClick = tPtr + 1.0;
+    const ev = [[.2, "whoosh_s"], [tClick, "click2"], [tClick + .05, "pop", 900]]; if (cap) ev.push([tClick + .4, "ding", 88]);
+    return { el, dur: tClick + 2.4, events: ev, anim(lt) {
+      rise(eye, eOut(P(lt, .05, .4)), 30); if (ttl) rise(ttl, eOut(P(lt, .1, .5)), 40);
+      const k0 = eOut(P(lt, .15, .5)); win.style.opacity = k0; win.style.transform = `translateY(${(1-k0)*100}px)`;
+      const W = 980, H = 620, iw = W, ih = img.naturalWidth ? W * img.naturalHeight / img.naturalWidth : H;
+      const s1 = Math.min(W / (Z.w*iw), H / (Z.h*ih)); const kz = eInOut(P(lt, tZ, tZd)); const sc = 1 + (s1 - 1)*kz;
+      const cx = (Z.x + Z.w/2)*iw, cy = (Z.y + Z.h/2)*ih; const tx = (W/2 - cx*sc)*kz, ty = (H/2 - cy*sc)*kz + (1-kz)*0;
+      img.style.transform = `translate(${tx}px, ${ty}px) scale(${sc})`;
+      const toV = (fx, fy) => [tx + fx*iw*sc, ty + fy*ih*sc];
+      if (hlb && c.highlight) { const [x1, y1] = toV(c.highlight.x, c.highlight.y); hlb.style.left = (x1-8)+"px"; hlb.style.top = (y1-8)+"px"; hlb.style.width = (c.highlight.w*iw*sc+16)+"px"; hlb.style.height = (c.highlight.h*ih*sc+16)+"px"; hlb.style.opacity = eOut(P(lt, tClick + .1, .4)); }
+      const tgt = c.click || { x: Z.x + Z.w/2, y: Z.y + Z.h/2 }; const [px, py] = toV(tgt.x, tgt.y);
+      const kp = eInOut(P(lt, tPtr, .9)); const sx = W*.85, sy = H*.9; const bx = sx + (px - sx)*kp, by = sy + (py - sy)*kp - Math.sin(kp*Math.PI)*60;
+      ptr.style.left = (bx - 6) + "px"; ptr.style.top = (by - 4) + "px"; ptr.style.opacity = P(lt, tPtr - .2, .3);
+      const press = lt > tClick && lt < tClick + .15 ? .85 : 1; ptr.style.transform = `scale(${press})`;
+      const kr = P(lt, tClick, .6); ring.style.opacity = kr > 0 && kr < 1 ? 1 - kr : 0; ring.style.left = (px - 45) + "px"; ring.style.top = (py - 45) + "px"; ring.style.transform = `scale(${.3 + kr*1.4})`;
+      if (cap) rise(cap, eOut(P(lt, tClick + .4, .5)), 30);
+    }};
+  },
+  cta(c) {
+    const el = h("div", "scene");
+    const t = h("div", "abs h1", c.lines.map(l => words(l)).join("<br>") + `<br>${words(c.accent || "", "accent")}`, "left:90px; top:560px; width:920px"); el.append(t);
+    const sub = c.sub ? h("div", "abs lead", esc(c.sub), "left:94px; top:1000px; width:900px") : null; if (sub) el.append(sub);
+    const btn = h("div", "abs", `<span class="btn">${esc(c.button || "testcaseai.com.br →")}</span>`, "left:90px; top:1250px"); el.append(btn);
+    const ws = [...t.querySelectorAll(".word")], tB = .1 + ws.length*.1 + .9;
+    const ev = ws.map((_, i) => [.12 + i*.1, "pop", 800 + i*40]).concat([[tB + .05, "chime"]]);
+    return { el, dur: tB + 1.6, events: ev, anim(lt) {
+      ws.forEach((w, i) => { const k = eOut(P(lt, .1 + i*.1, .45)); w.style.opacity = k; w.style.transform = `translateY(${(1-k)*80}px)`; });
+      if (sub) rise(sub, eOut(P(lt, tB - .3, .45)), 30);
+      const k = eBack(P(lt, tB, .5)); const pulse = lt > tB + .5 ? 1 + .03*Math.sin((lt - tB - .5)*7) : 1;
+      btn.style.opacity = clamp(k*1.4); btn.style.transform = `scale(${(.8+.2*k)*pulse})`; btn.style.transformOrigin = "left center";
+    }};
+  }
+};
+
+let TL = [], TOTAL = 0, EVENTS = [];
+function build(cfg) {
+  const th = THEMES[cfg.theme] || THEMES.dark, st = $("stage").style;
+  st.setProperty("--bg", th.bg); st.setProperty("--g1", th.g1); st.setProperty("--g2", th.g2); st.setProperty("--accent", th.accent);
+  $("stage").style.background = th.bg; $("scenes").innerHTML = ""; TL = []; EVENTS = []; let t = 0; const X = .3;
+  cfg.scenes.forEach((sc, i) => {
+    const s = SCENES[sc.type](sc); $("scenes").append(s.el);
+    TL.push({ s, start: t, end: t + s.dur, first: i === 0 });
+    if (i > 0) EVENTS.push([t - .25, "whoosh"]);
+    s.events.forEach(([et, k, a]) => EVENTS.push([t + et, k, a]));
+    t += s.dur - X;
+  });
+  TOTAL = t + X; window.TOTAL = TOTAL; window.EVENTS = EVENTS;
+}
+function render(t) {
+  $("g1").style.left = (420 + 120*Math.sin(t*.45)) + "px"; $("g1").style.top = (-260 + 90*Math.cos(t*.38)) + "px";
+  $("g2").style.left = (-420 + 140*Math.cos(t*.33)) + "px"; $("g2").style.top = (1150 + 110*Math.sin(t*.41)) + "px";
+  $("grid").style.backgroundPosition = `0 ${-(t*14) % 72}px`;
+  TL.forEach(({ s, start, end, first }, i) => {
+    const last = i === TL.length - 1;
+    const a = Math.min(first ? 1 : eOut(P(t, start, .35)), last ? 1 : 1 - eInOut(P(t, end - .35, .35)));
+    s.el.style.opacity = t < start || t > end ? 0 : a;
+    if (t >= start && t <= end) s.anim(t - start);
+  });
+  $("pbar").style.width = (100 * clamp(t / TOTAL)) + "%";
+}
+window.build = build; window.render = render;
+
+// prévia no navegador
+function fit() { const w = $("wrap"); if (w && document.body.classList.contains("preview")) $("stage").style.transform = `scale(${w.clientWidth / 1080})`; }
+const CFG = JSON.parse($("config").textContent);
+build(CFG); render(0); fit(); addEventListener("resize", fit);
+let raf = null;
+$("play").onclick = () => { cancelAnimationFrame(raf); const t0 = performance.now();
+  const loop = now => { const t = (now - t0) / 1000; render(Math.min(t, TOTAL)); $("time").textContent = t.toFixed(1).replace(".", ",") + " s"; if (t < TOTAL) raf = requestAnimationFrame(loop); };
+  raf = requestAnimationFrame(loop); };
+</script>
+
+<!-- SCRIPT DE RENDERIZAÇÃO (Python). Uso: python3 render_reel.py gerador.html roteiro.json saida.mp4 -->
+<script type="text/plain" id="render-py">
+import sys, json, wave, subprocess, pathlib, numpy as np
+from scipy.signal import butter, sosfilt
+from playwright.sync_api import sync_playwright
+
+html, cfg_path, out = sys.argv[1], sys.argv[2], sys.argv[3]
+cfg = json.loads(pathlib.Path(cfg_path).read_text(encoding="utf-8"))
+FPS, SR = 30, 48000
+chrome = next((str(p) for p in pathlib.Path("/opt/pw-browsers").glob("chromium-*/chrome-linux/chrome")), None)
+
+with sync_playwright() as pw:
+    b = pw.chromium.launch(executable_path=chrome)
+    pg = b.new_page(viewport={"width": 1080, "height": 1920})
+    pg.goto(pathlib.Path(html).resolve().as_uri())
+    pg.evaluate("document.body.className='render'; document.getElementById('stage').style.transform='none'")
+    pg.evaluate("cfg => build(cfg)", cfg)
+    total = pg.evaluate("window.TOTAL"); events = pg.evaluate("window.EVENTS")
+    silent = out + ".silent.mp4"
+    ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(FPS), "-c:v", "mjpeg", "-i", "-",
+                           "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "18", "-r", str(FPS), silent], stdin=subprocess.PIPE)
+    for i in range(int(total * FPS)):
+        pg.evaluate(f"render({i / FPS})"); ff.stdin.write(pg.screenshot(type="jpeg", quality=92))
+    ff.stdin.close(); ff.wait(); b.close()
+
+N = int(SR * total); L = np.zeros(N); R = np.zeros(N); rng = np.random.default_rng(7)
+def add(s, t, g=1.0, pan=0.0):
+    i = int(t * SR); j = min(N, i + len(s))
+    if i < 0 or i >= N: return
+    L[i:j] += s[:j-i] * g * (1 - max(0, pan)); R[i:j] += s[:j-i] * g * (1 + min(0, pan))
+ex = lambda n, k: np.exp(-np.linspace(0, k, n))
+bp = lambda x, lo, hi: sosfilt(butter(2, [lo, hi], btype="band", fs=SR, output="sos"), x)
+lp = lambda x, f: sosfilt(butter(2, f, btype="low", fs=SR, output="sos"), x)
+hp = lambda x, f: sosfilt(butter(2, f, btype="high", fs=SR, output="sos"), x)
+note = lambda m: 440 * 2 ** ((m - 69) / 12)
+def sweep(f0, f1, d, k):
+    n = int(SR*d); t = np.arange(n)/SR; f = f1 + (f0-f1)*np.exp(-t*k); return np.sin(2*np.pi*np.cumsum(f)/SR), n
+def pop(f0=900, f1=300, d=.09): s, n = sweep(f0, f1, d, 40); return s * ex(n, 9) * .6
+def click(d=.012):
+    n = int(SR*d); x = bp(rng.standard_normal(n), 2500, 7000) * ex(n, 7)
+    return (x*.5 + np.sin(2*np.pi*180*np.arange(n)/SR) * ex(n, 12) * .3) * 1.1
+def whoosh(d=.55):
+    n = int(SR*d); x = rng.standard_normal(n); o = np.zeros(n); seg = 24; L_ = n // seg
+    for k in range(seg):
+        f = 300 + 4500 * (k/seg)**1.6; y = bp(x, max(60, f*.6), min(20000, f*1.4)); w = np.zeros(n); a = k*L_; bb = min(n, a + 2*L_); w[a:bb] = np.hanning(bb - a); o += y*w
+    return o * np.sin(np.linspace(0, np.pi, n))**1.5 * .35
+def hit(d=.6):
+    s, n = sweep(135, 45, d, 18); return (np.tanh(s*2.2)*ex(n, 5) + lp(rng.standard_normal(n), 1800)*ex(n, 40)*.5) * .9
+def glitch(d=.38):
+    n = int(SR*d); t = np.arange(n)/SR; o = np.zeros(n); st = int(SR*.03)
+    for a in range(0, n, st):
+        f = rng.choice([220, 330, 440, 660, 880, 1320]); bb = min(n, a+st); o[a:bb] = np.round(np.sign(np.sin(2*np.pi*f*t[a:bb]))*3)/3 * (.6 if rng.random() > .3 else 0)
+    return hp(o, 300) * .18
+def ding(f, d=.9):
+    n = int(SR*d); t = np.arange(n)/SR
+    return (np.sin(2*np.pi*f*t) + .35*np.sin(2*np.pi*2.01*f*t) + .15*np.sin(2*np.pi*3.02*f*t)) * np.minimum(1, t/.004) * ex(n, 7) * .32
+def thud(d=.3): s, n = sweep(120, 60, d, 25); return s * ex(n, 9) * .8
+def swish(d=.22): n = int(SR*d); return bp(rng.standard_normal(n), 3000, 9000) * np.sin(np.linspace(0, np.pi, n))**2 * .25
+
+# trilha de fundo: acordes Am F C G com pulso e batida leve a partir da metade
+tt = np.arange(N)/SR; bed = np.zeros(N); prog = [[57,60,64,69],[53,57,60,65],[48,55,60,64],[55,59,62,67]]; seg = total/4
+for k, ch in enumerate(prog):
+    d = seg + .6; n = int(SR*d); t = np.arange(n)/SR; s = np.zeros(n)
+    for m in ch:
+        for det in (-.12, 0, .12):
+            ff_ = note(m) * 2**(det/12); s += np.sin(2*np.pi*ff_*t) + .3*np.sin(2*np.pi*2*ff_*t + .4)
+    s = lp(s, 1400) * np.minimum(1, t/.6) * np.minimum(1, (d - t)/.6); i = int(k*seg*SR); j = min(N, i + n); bed[i:j] += s[:j-i]
+beat = 60/104; bed *= .55 + .45*(1 - np.exp(-((tt % beat)/beat)*6)); bed = bed/np.max(np.abs(bed))*.10*np.minimum(1, tt/1.0)*np.minimum(1, (total - tt)/1.2)
+L += bed; R += bed
+for x in np.arange(total*.5, total - .6, beat): add(thud(.22), x, .35)
+for x in np.arange(total*.5 + beat/2, total - .6, beat): add(click(.03), x, .25, .3)
+
+for ev in events:
+    t, k, a = ev[0], ev[1], (ev[2] if len(ev) > 2 else None); pan = rng.uniform(-.3, .3)
+    if k == "pop": add(pop(a or 700, (a or 700)*.35, .09), t, .6, pan)
+    elif k == "click": add(click(), t + rng.uniform(-.008, .008), rng.uniform(.55, .95), pan)
+    elif k == "whoosh": add(whoosh(.6), t, .8)
+    elif k == "whoosh_s": add(whoosh(.45), t, .4)
+    elif k == "hit": add(hit(), t, .55)
+    elif k == "glitch": add(glitch(), t, 1.0)
+    elif k == "ding": add(ding(note(a or 84)), t, .9)
+    elif k == "thud": add(thud(.4), t, .9)
+    elif k == "swish": add(swish(), t, 1.0, pan)
+    elif k == "chime":
+        for i_, m in enumerate((84, 88, 91, 96)): add(ding(note(m), 1.2), t + i_*.09, .7, -.3 + i_*.2)
+
+mix = np.stack([L, R], 1); mix = np.tanh(mix*1.6)/np.tanh(1.6); mix = mix/max(1e-9, np.max(np.abs(mix)))*.89
+wav = out + ".wav"
+with wave.open(wav, "wb") as w: w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mix*32767).astype(np.int16).tobytes())
+subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", silent, "-i", wav, "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out], check=True)
+pathlib.Path(silent).unlink(); pathlib.Path(wav).unlink()
+print(f"OK {out} ({total:.1f}s)")
+</script>
+</body>
+</html>

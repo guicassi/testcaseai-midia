@@ -1,0 +1,9 @@
+{"style":"trailer","scenes":[
+{"type":"card","lines":["Uma sprint."],"dur":2.2},
+{"type":"card","lines":["Uma história","escrita às pressas."],"dur":2.6},
+{"type":"card","lines":["Nenhum teste","documentado."],"dur":2.6},
+{"type":"flash","words":["SEXTA.","17H.","DEPLOY."]},
+{"type":"titulo","title":"O BUG","sub":"que ninguém viu chegar"},
+{"type":"card","lines":["Em breve","no seu ambiente","de produção."],"dur":3.0,"hit":true},
+{"type":"fim","lines":["Não deixe","virar sequência."],"sub":"Teste do requisito ao release.","url":"testcaseai.com.br"}
+]}
