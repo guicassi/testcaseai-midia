@@ -1,9 +1,39 @@
 {
-  "ordem": ["editorial", "terminal", "chat", "quadro", "trailer", "pop", "classico"],
+  "ordem": [
+    "editorial",
+    "terminal",
+    "chat",
+    "quadro",
+    "trailer",
+    "pop",
+    "classico"
+  ],
   "ultimo": "classico",
   "historico": [
-    {"data": "2026-10-18", "estilo": "classico", "tema": "Antes x Depois"},
-    {"data": "2026-10-22", "estilo": "classico", "tema": "Cadê a evidência?"},
-    {"data": "2026-10-25", "estilo": "classico", "tema": "Antes de dizer testado"}
+    {
+      "data": "2026-10-18",
+      "estilo": "classico",
+      "tema": "Antes x Depois"
+    },
+    {
+      "data": "2026-10-22",
+      "estilo": "classico",
+      "tema": "Cadê a evidência?"
+    },
+    {
+      "data": "2026-10-25",
+      "estilo": "classico",
+      "tema": "Antes de dizer testado"
+    },
+    {
+      "data": "2026-10-29",
+      "estilo": "classico",
+      "tema": "Requisito mudou, e o teste?"
+    },
+    {
+      "data": "2026-11-01",
+      "estilo": "classico",
+      "tema": "QA não é gargalo"
+    }
   ]
 }
