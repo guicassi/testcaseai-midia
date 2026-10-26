@@ -3,6 +3,12 @@
 Vídeos 1080x1920, 30 fps, com trilha e efeitos sonoros sintetizados (sem direitos autorais).
 Requisitos: Python 3 com `playwright`, `numpy`, `scipy` e `ffmpeg` (Chromium em /opt/pw-browsers).
 
+## Amostras (assista para ver cada estilo)
+
+`amostras/1-classico.mp4` (+ `1-classico-quiz.mp4`, `1-classico-pov.mp4`), `2-editorial.mp4`, `3-terminal.mp4`,
+`4-conversa.mp4`, `5-quadro.mp4`, `6-trailer.mp4`, `7-pop.mp4`. Também estão no Canva, pasta "Modelos (não mexer)",
+como "MODELO REEL - <estilo>".
+
 ## Como renderizar
 
 | Estilo | Arquivo HTML | Script |
