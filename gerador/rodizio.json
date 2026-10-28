@@ -8,7 +8,7 @@
     "pop",
     "classico"
   ],
-  "ultimo": "classico",
+  "ultimo": "editorial",
   "historico": [
     {
       "data": "2026-10-18",
@@ -34,6 +34,11 @@
       "data": "2026-11-01",
       "estilo": "classico",
       "tema": "QA não é gargalo"
+    },
+    {
+      "data": "2026-10-28",
+      "estilo": "editorial",
+      "tema": "Mito: automação substitui o QA?"
     }
   ]
 }
