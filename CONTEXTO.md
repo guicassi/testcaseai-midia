@@ -4,11 +4,9 @@ Leia este arquivo no início de qualquer conversa sobre as redes sociais da test
 
 ## Organização
 
-- **Uma única tarefa agendada:** "testcaseAI · Redes sociais (rotina diária)" (trig_019dcET7TrdM5TXPLD4r6WgF), todo dia às 11h47 (Brasília).
-  - A) Publica o que estiver em "2 - Aprovados" com a data do dia.
-  - B) Aplica os ajustes pedidos nos comentários (arte, legenda ou vídeo de Reel, este com o gerador deste repositório).
-  - C) Aos domingos, produz os posts da semana seguinte em "1 - Para aprovar".
-- A antiga "Produção semanal" (trig_01SFoTDYrTtCrQkYJvpsAext) foi desativada em 30/10/2026, porque a rotina diária passou a fazer a produção.
+- **Duas tarefas agendadas, cada uma com seu próprio log:**
+  - "testcaseAI · Produção semanal" (trig_01SFoTDYrTtCrQkYJvpsAext), aos domingos às 17h52 (Brasília). Cria os posts e Reels da semana seguinte em "1 - Para aprovar". Não publica nada.
+  - "testcaseAI · Publicação diária" (trig_019dcET7TrdM5TXPLD4r6WgF), todo dia às 11h47 (Brasília). Publica o que estiver em "2 - Aprovados" com a data do dia e aplica os ajustes pedidos nos comentários (arte, legenda ou vídeo de Reel, este com o gerador deste repositório). Não cria posts novos.
 - **Chat de produção:** uma conversa fixa, "testcaseAI · Estúdio de conteúdo", para pedidos avulsos (refazer um Reel, criar um post extra, mudar regras). Ela precisa ter este repositório com permissão de escrita.
 - **Regra de ouro:** só é publicado o que o usuário mover para "2 - Aprovados".
 
