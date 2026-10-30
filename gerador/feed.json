@@ -1,11 +1,64 @@
 {
-  "cores_validas": ["escura", "clara", "violeta", "creme", "terminal", "branca", "colorida"],
-  "estilo_reel_para_cor": {"classico": "escura ou violeta (conforme theme)", "editorial": "creme", "terminal": "terminal", "chat": "clara", "quadro": "branca", "trailer": "escura", "pop": "colorida"},
+  "cores_validas": [
+    "escura",
+    "clara",
+    "violeta",
+    "creme",
+    "terminal",
+    "branca",
+    "colorida"
+  ],
+  "estilo_reel_para_cor": {
+    "classico": "escura ou violeta (conforme theme)",
+    "editorial": "creme",
+    "terminal": "terminal",
+    "chat": "clara",
+    "quadro": "branca",
+    "trailer": "escura",
+    "pop": "colorida"
+  },
   "ultimas": [
-    {"data": "2026-10-28", "tipo": "reel", "cor": "creme", "formato": "editorial"},
-    {"data": "2026-10-29", "tipo": "reel", "cor": "escura", "formato": "classico"},
-    {"data": "2026-10-30", "tipo": "imagem", "cor": "escura", "formato": "produto"},
-    {"data": "2026-10-31", "tipo": "imagem", "cor": "violeta", "formato": "tabela"},
-    {"data": "2026-11-01", "tipo": "reel", "cor": "escura", "formato": "classico"}
+    {
+      "data": "2026-10-28",
+      "tipo": "reel",
+      "cor": "creme",
+      "formato": "editorial"
+    },
+    {
+      "data": "2026-10-29",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "classico"
+    },
+    {
+      "data": "2026-10-30",
+      "tipo": "imagem",
+      "cor": "escura",
+      "formato": "produto"
+    },
+    {
+      "data": "2026-10-31",
+      "tipo": "reel",
+      "cor": "creme",
+      "formato": "editorial"
+    },
+    {
+      "data": "2026-11-01",
+      "tipo": "reel",
+      "cor": "terminal",
+      "formato": "terminal"
+    },
+    {
+      "data": "2026-11-03",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "classico"
+    },
+    {
+      "data": "2026-11-06",
+      "tipo": "imagem",
+      "cor": "violeta",
+      "formato": "tabela"
+    }
   ]
 }
