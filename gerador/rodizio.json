@@ -8,7 +8,7 @@
     "pop",
     "classico"
   ],
-  "ultimo": "terminal",
+  "ultimo": "trailer",
   "historico": [
     {
       "data": "2026-10-18",
@@ -44,6 +44,21 @@
       "data": "2026-11-01",
       "estilo": "terminal",
       "tema": "História validada antes do código"
+    },
+    {
+      "data": "2026-11-05",
+      "estilo": "chat",
+      "tema": "Quem testou isso?"
+    },
+    {
+      "data": "2026-11-07",
+      "estilo": "quadro",
+      "tema": "Frases que todo QA já ouviu"
+    },
+    {
+      "data": "2026-11-08",
+      "estilo": "trailer",
+      "tema": "Planilha versão final"
     }
   ]
 }

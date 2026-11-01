@@ -49,16 +49,46 @@
       "formato": "terminal"
     },
     {
+      "data": "2026-11-02",
+      "tipo": "carrossel",
+      "cor": "clara",
+      "formato": "carrossel educativo"
+    },
+    {
       "data": "2026-11-03",
       "tipo": "reel",
       "cor": "escura",
       "formato": "classico"
     },
     {
+      "data": "2026-11-04",
+      "tipo": "imagem",
+      "cor": "escura",
+      "formato": "tela de codigo"
+    },
+    {
+      "data": "2026-11-05",
+      "tipo": "reel",
+      "cor": "clara",
+      "formato": "chat"
+    },
+    {
       "data": "2026-11-06",
       "tipo": "imagem",
       "cor": "violeta",
       "formato": "tabela"
+    },
+    {
+      "data": "2026-11-07",
+      "tipo": "reel",
+      "cor": "branca",
+      "formato": "quadro"
+    },
+    {
+      "data": "2026-11-08",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "trailer"
     }
   ]
 }
