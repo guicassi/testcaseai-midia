@@ -89,6 +89,48 @@
       "tipo": "reel",
       "cor": "escura",
       "formato": "trailer"
+    },
+    {
+      "data": "2026-11-09",
+      "tipo": "carrossel",
+      "cor": "escura",
+      "formato": "carrossel educativo"
+    },
+    {
+      "data": "2026-11-10",
+      "tipo": "reel",
+      "cor": "colorida",
+      "formato": "pop"
+    },
+    {
+      "data": "2026-11-11",
+      "tipo": "imagem",
+      "cor": "violeta",
+      "formato": "frase de impacto"
+    },
+    {
+      "data": "2026-11-12",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "classico"
+    },
+    {
+      "data": "2026-11-13",
+      "tipo": "imagem",
+      "cor": "clara",
+      "formato": "produto"
+    },
+    {
+      "data": "2026-11-14",
+      "tipo": "reel",
+      "cor": "creme",
+      "formato": "editorial"
+    },
+    {
+      "data": "2026-11-15",
+      "tipo": "reel",
+      "cor": "terminal",
+      "formato": "terminal"
     }
   ]
 }

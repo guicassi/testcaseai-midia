@@ -8,7 +8,7 @@
     "pop",
     "classico"
   ],
-  "ultimo": "trailer",
+  "ultimo": "terminal",
   "historico": [
     {
       "data": "2026-10-18",
@@ -59,6 +59,26 @@
       "data": "2026-11-08",
       "estilo": "trailer",
       "tema": "Planilha versão final"
+    },
+    {
+      "data": "2026-11-10",
+      "estilo": "pop",
+      "tema": "3 perguntas antes de aprovar a história"
+    },
+    {
+      "data": "2026-11-12",
+      "estilo": "classico",
+      "tema": "Quiz: o que automatizar primeiro?"
+    },
+    {
+      "data": "2026-11-14",
+      "estilo": "editorial",
+      "tema": "Bugs que você já conheceu"
+    },
+    {
+      "data": "2026-11-15",
+      "estilo": "terminal",
+      "tema": "Checagem antes do release"
     }
   ]
 }
