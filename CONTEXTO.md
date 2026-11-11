@@ -42,6 +42,13 @@ Um post por dia, nunca dois no mesmo dia:
 
 O LinkedIn recebe só os posts de dia útil, sempre com legenda própria. As paletas escura, clara e violeta se alternam nos posts estáticos. Os Reels seguem o rodízio de estilos, sem repetir estilo na semana.
 
+## Série "Bugs que custaram caro" (formato em teste)
+
+- Reels longos (44–60 s), narrados, sobre incidentes reais e públicos de software. Publicados às TERÇAS no lugar do Reel do dia: Ep. 1 Knight Capital (17/11), Ep. 2 Tela azul (24/11), Ep. 3 WhatsApp sumiu (01/12).
+- Produzidos fora do gerador (animação própria + narração do ElevenLabs). Arquivos em `reels/AAAA-MM-DD-bugs-que-custaram-caro-epN-*.mp4`. Não há roteiro JSON: ajustes de vídeo devem ser pedidos no chat de produção, não aplicados pela publicação diária.
+- Exceções aprovadas pelo usuário: duração acima de 22 s e citação dos nomes das empresas envolvidas nos incidentes (casos históricos públicos). Fora da série, a regra de não citar empresas continua valendo.
+- Fechamento padrão: cartão do testcaseAI (Do requisito ao release, sem lacunas de qualidade · testcaseai.com.br).
+
 ## Regras de conteúdo
 
 Português do Brasil, tom profissional e direto. Nunca culpar o time ("não é falha do time, é do processo"). Não citar concorrentes nem nomes de ferramentas no texto. Sem cases ou clientes, sem números ou depoimentos inventados. Site: testcaseai.com.br. Planos: Starter R$199, Pro R$599, Team R$1.490, Enterprise sob consulta. Mensal, sem fidelidade.

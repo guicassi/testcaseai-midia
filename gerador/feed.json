@@ -131,6 +131,24 @@
       "tipo": "reel",
       "cor": "terminal",
       "formato": "terminal"
+    },
+    {
+      "data": "2026-11-17",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "serie-bugs-que-custaram-caro"
+    },
+    {
+      "data": "2026-11-24",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "serie-bugs-que-custaram-caro"
+    },
+    {
+      "data": "2026-12-01",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "serie-bugs-que-custaram-caro"
     }
   ]
 }
