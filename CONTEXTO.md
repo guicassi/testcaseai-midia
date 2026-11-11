@@ -5,9 +5,9 @@ Leia este arquivo no início de qualquer conversa sobre as redes sociais da test
 ## Organização
 
 - **Duas tarefas agendadas, cada uma com seu próprio log:**
-  - "testcaseAI · Produção semanal" (trig_01SFoTDYrTtCrQkYJvpsAext), aos domingos às 17h52 (Brasília). Cria os posts e Reels da semana seguinte em "1 - Para aprovar". Não publica nada.
+  - "testcaseAI · Produção semanal" (trig_01SFoTDYrTtCrQkYJvpsAext), aos domingos às 17h52 (Brasília). Cria os posts e Reels da semana seguinte em "1 - Para aprovar" (incluindo os Reels da tarde e, se preciso, a RESERVA de terça) e escreve o roteiro do próximo episódio da série. Não publica nada.
   - "testcaseAI · Publicação diária" (trig_019dcET7TrdM5TXPLD4r6WgF), todo dia às 11h47 (Brasília). Publica o que estiver em "2 - Aprovados" com a data do dia (exceto títulos com "18H") e aplica os ajustes pedidos nos comentários (arte, legenda ou vídeo de Reel, este com o gerador deste repositório). Não cria posts novos.
-  - "testcaseAI · Publicação da tarde", SEG, QUA e SEX às 17h47 (Brasília). Publica só os designs aprovados do dia com "18H" no título (os Reels da tarde). Não aplica ajustes.
+  - "testcaseAI · Publicação da tarde" (trig_015GGXyq1tBPMR3XuSfwXnzD), todo dia às 17h47 (Brasília; na prática SEG, QUA e SEX). Publica só os designs aprovados do dia com "18H" no título (os Reels da tarde). Não aplica ajustes.
 - **Chat de produção:** uma conversa fixa, "testcaseAI · Estúdio de conteúdo", para pedidos avulsos (refazer um Reel, criar um post extra, mudar regras). Ela precisa ter este repositório com permissão de escrita.
 - **Regra de ouro:** só é publicado o que o usuário mover para "2 - Aprovados".
 
