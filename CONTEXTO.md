@@ -6,7 +6,8 @@ Leia este arquivo no início de qualquer conversa sobre as redes sociais da test
 
 - **Duas tarefas agendadas, cada uma com seu próprio log:**
   - "testcaseAI · Produção semanal" (trig_01SFoTDYrTtCrQkYJvpsAext), aos domingos às 17h52 (Brasília). Cria os posts e Reels da semana seguinte em "1 - Para aprovar". Não publica nada.
-  - "testcaseAI · Publicação diária" (trig_019dcET7TrdM5TXPLD4r6WgF), todo dia às 11h47 (Brasília). Publica o que estiver em "2 - Aprovados" com a data do dia e aplica os ajustes pedidos nos comentários (arte, legenda ou vídeo de Reel, este com o gerador deste repositório). Não cria posts novos.
+  - "testcaseAI · Publicação diária" (trig_019dcET7TrdM5TXPLD4r6WgF), todo dia às 11h47 (Brasília). Publica o que estiver em "2 - Aprovados" com a data do dia (exceto títulos com "18H") e aplica os ajustes pedidos nos comentários (arte, legenda ou vídeo de Reel, este com o gerador deste repositório). Não cria posts novos.
+  - "testcaseAI · Publicação da tarde", SEG, QUA e SEX às 17h47 (Brasília). Publica só os designs aprovados do dia com "18H" no título (os Reels da tarde). Não aplica ajustes.
 - **Chat de produção:** uma conversa fixa, "testcaseAI · Estúdio de conteúdo", para pedidos avulsos (refazer um Reel, criar um post extra, mudar regras). Ela precisa ter este repositório com permissão de escrita.
 - **Regra de ouro:** só é publicado o que o usuário mover para "2 - Aprovados".
 
@@ -14,7 +15,7 @@ Leia este arquivo no início de qualquer conversa sobre as redes sociais da test
 
 Pastas: "1 - Para aprovar" = FAHYI-uZ2sE | "2 - Aprovados" = FAHYIyf8uUM | "3 - Publicados" = FAHYIyPT_GY | "0 - Logo e prints" = FAHYIwKfhEQ | "Modelos (não mexer)" = FAHYI_hVMQs.
 
-- Títulos: `AAAA-MM-DD DIA | REDES | Tema (formato, paleta)`. Reels: `AAAA-MM-DD DIA | IG+FB | REEL | Tema (estilo)`, numa página de 1080x1920 com o vídeo.
+- Títulos: `AAAA-MM-DD DIA | REDES | Tema (formato, paleta)`. Reels: `AAAA-MM-DD DIA | IG+FB | REEL | Tema (estilo)`, numa página de 1080x1920 com o vídeo. Reels da tarde: `AAAA-MM-DD DIA 18H | IG+FB | REEL | Tema (estilo)`.
 - Legendas nos comentários: "LEGENDA LINKEDIN:" e "LEGENDA INSTAGRAM E FACEBOOK:". O roteiro dos Reels fica em "ROTEIRO REEL (parte X/N):", começando com `estilo: <nome>`.
 - Modelos: carrossel DAHYI-FngNQ | formatos novos DAHYST4VAAE | tabela e frase em violeta DAHYSRUuznc | base dos Reels DAHYSlYnC8M.
 
@@ -30,24 +31,23 @@ Organização 6ad18cf2e84ebcf3f72465f7. Canais: LinkedIn 6ad18eae778b240e2f22dc0
 
 ## Calendário
 
-Um post por dia, nunca dois no mesmo dia:
+Manhã (11h47), um post por dia:
 
 - SEG: carrossel educativo (LI+IG+FB)
-- TER: Reel (IG+FB)
+- TER: Reel da série "Bugs que custaram caro" (IG+FB), com um Reel RESERVA em "1 - Para aprovar"
 - QUA: imagem em formato novo (LI+IG+FB)
 - QUI: Reel (IG+FB)
 - SEX: produto em ação (LI+IG+FB)
 - SÁB: Reel mais leve (IG+FB)
 - DOM: Reel (IG+FB)
 
-O LinkedIn recebe só os posts de dia útil, sempre com legenda própria. As paletas escura, clara e violeta se alternam nos posts estáticos. Os Reels seguem o rodízio de estilos, sem repetir estilo na semana.
+Tarde (17h47), Reel extra: SEG, QUA e SEX (IG+FB), com "18H" no título.
+
+Por semana: 7 Reels (6 do gerador, sem repetir estilo, + 1 episódio da série) e 3 posts estáticos. O LinkedIn recebe só os estáticos (SEG, QUA, SEX), sempre com legenda própria. As paletas escura, clara e violeta se alternam nos posts estáticos.
 
 ## Série "Bugs que custaram caro" (formato em teste)
 
-- Reels longos (44–60 s), narrados, sobre incidentes reais e públicos de software. Publicados às TERÇAS no lugar do Reel do dia (o Ep. 1 foi antecipado para a quinta 12/11 e o Reel Quiz foi para 17/11): Ep. 1 Knight Capital (12/11), Ep. 2 Tela azul (24/11), Ep. 3 WhatsApp sumiu (01/12).
-- Produzidos fora do gerador (animação própria + narração do ElevenLabs). Arquivos em `reels/AAAA-MM-DD-bugs-que-custaram-caro-epN-*.mp4`. Não há roteiro JSON: ajustes de vídeo devem ser pedidos no chat de produção, não aplicados pela publicação diária.
-- Exceções aprovadas pelo usuário: duração acima de 22 s e citação dos nomes das empresas envolvidas nos incidentes (casos históricos públicos). Fora da série, a regra de não citar empresas continua valendo.
-- Fechamento padrão: cartão do testcaseAI (Do requisito ao release, sem lacunas de qualidade · testcaseai.com.br).
+Reels narrados (45–60 s) sobre incidentes reais de software, às terças. Tudo sobre a série (episódios, fluxo semi-automático com voz do ElevenLabs, passo a passo de montagem, pauta) está em `serie/README.md` e `serie/pauta.md`. Datas: Ep. 1 (Knight Capital) 12/11, Ep. 2 (tela azul) 17/11, Ep. 3 (WhatsApp) 24/11. Exceções aprovadas: duração acima de 22 s e nomes das empresas dos incidentes. Ajustes de vídeo da série são feitos no chat de produção, não pela publicação diária.
 
 ## Regras de conteúdo
 

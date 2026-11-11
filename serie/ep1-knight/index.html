@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #07080B; }
+  body { font-family: 'Inter', sans-serif; color: #F2F3F5; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .bg { position: absolute; inset: 0;
+    background:
+      radial-gradient(900px 700px at 50% 38%, rgba(255,70,70,var(--glow,0.0)) 0%, rgba(0,0,0,0) 70%),
+      radial-gradient(1200px 900px at 50% 40%, #12141B 0%, #07080B 70%);
+  }
+  .grid { position: absolute; inset: 0; opacity: .5;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 30%, transparent 75%);
+  }
+  .vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.65) 100%); }
+
+  /* header */
+  #header { position: absolute; top: 120px; left: 90px; right: 90px; }
+  .kicker { font-weight: 800; font-size: 34px; letter-spacing: 6px; color: #F5B83D; }
+  .sub { font-weight: 600; font-size: 28px; letter-spacing: 4px; color: rgba(255,255,255,.45); margin-top: 10px; }
+  .rec { display:inline-block; width: 14px; height: 14px; border-radius: 50%; background:#FF4747; margin-right: 14px; vertical-align: 3px; box-shadow: 0 0 14px #FF4747; }
+  .bars { display: flex; gap: 10px; margin-top: 30px; }
+  .bar { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0%; background: #F5B83D; border-radius: 4px; }
+
+  #root { position: absolute; inset: 0; }
+  .layer { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+  .w { display: inline-block; will-change: transform, opacity; }
+  .line { text-align: center; white-space: nowrap; }
+  .hl-red { color: #FF4D4D; }
+  .hl-amber { color: #F5B83D; }
+  .hl-green { color: #3DDC84; }
+  .dim { color: rgba(255,255,255,.55); }
+
+  .big { font-weight: 800; font-size: 104px; letter-spacing: -3px; line-height: 1.08; }
+  .mid { font-weight: 800; font-size: 82px; letter-spacing: -2px; line-height: 1.12; }
+  .small { font-weight: 600; font-size: 46px; line-height: 1.3; }
+  .tag { display:inline-block; font-family: 'DejaVu Sans Mono', monospace; font-size: 30px; letter-spacing: 3px; padding: 12px 22px; border-radius: 12px; border: 2px solid rgba(255,255,255,.18); color: rgba(255,255,255,.75); background: rgba(255,255,255,.04); }
+
+  .counter { font-weight: 900; font-size: 100px; letter-spacing: -4px; color: #FF4D4D; text-shadow: 0 0 60px rgba(255,60,60,.55); font-variant-numeric: tabular-nums; text-align:center; white-space: nowrap; }
+
+  .card { position: absolute; border-radius: 28px; background: linear-gradient(180deg, #1A1D26, #12141B); border: 2px solid rgba(255,255,255,.08); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+
+  .srv { position: absolute; width: 196px; height: 250px; border-radius: 24px; background: #151821; border: 3px solid rgba(255,255,255,.08); display:flex; flex-direction: column; align-items:center; justify-content: center; gap: 14px; }
+  .srv .nm { font-family: 'DejaVu Sans Mono', monospace; font-size: 26px; color: rgba(255,255,255,.5); letter-spacing: 2px; }
+  .srv .led { width: 22px; height: 22px; border-radius: 50%; background: #3A3F4C; }
+  .srv .st { font-weight: 800; font-size: 34px; color: rgba(255,255,255,.35); }
+  .srv .rack { width: 120px; display:flex; flex-direction:column; gap:8px; }
+  .srv .rack b { display:block; height: 10px; border-radius: 5px; background: rgba(255,255,255,.08); }
+
+  .badge { position: absolute; font-weight: 800; font-size: 30px; letter-spacing: 3px; padding: 14px 24px; border-radius: 14px; background: #FF4D4D; color: #fff; box-shadow: 0 10px 40px rgba(255,60,60,.5); white-space: nowrap; }
+
+  .term { position: absolute; left: 90px; right: 90px; border-radius: 26px; background: #0D0F14; border: 2px solid rgba(255,77,77,.35); overflow: hidden; box-shadow: 0 0 80px rgba(255,60,60,.18); }
+  .term .tb { height: 64px; display:flex; align-items:center; gap: 12px; padding: 0 26px; border-bottom: 2px solid rgba(255,255,255,.06); }
+  .term .tb i { width: 18px; height: 18px; border-radius: 50%; background: #3A3F4C; }
+  .term .tb span { margin-left: auto; font-family: 'DejaVu Sans Mono', monospace; font-size: 24px; color: #FF4D4D; letter-spacing: 2px; }
+  .term .rows { position: relative; height: 520px; overflow: hidden; }
+  .row { position: absolute; left: 30px; right: 30px; height: 52px; font-family: 'DejaVu Sans Mono', monospace; font-size: 29px; display:flex; justify-content: space-between; align-items:center; }
+
+  .check { display:flex; align-items:center; gap: 30px; font-weight: 700; font-size: 50px; }
+  .box { width: 72px; height: 72px; border-radius: 18px; border: 4px solid rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-size: 46px; font-weight: 900; color: #07080B; }
+
+  .pill { display:inline-block; font-weight: 800; font-size: 44px; padding: 26px 46px; border-radius: 999px; background: #F5B83D; color: #0B0B0F; box-shadow: 0 16px 50px rgba(245,184,61,.35); }
+  .handle { font-weight: 600; font-size: 32px; color: rgba(255,255,255,.45); letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg" id="bg"></div>
+  <div class="grid"></div>
+  <div id="root"></div>
+  <div id="header">
+    <div class="kicker"><span class="rec"></span>BUGS QUE CUSTARAM CARO</div>
+    <div class="sub">EP. 1 · KNIGHT CAPITAL</div>
+    <div class="bars" id="bars"></div>
+  </div>
+  <div class="vignette"></div>
+</div>
+
+<script>
+// ---------- helpers ----------
+const clamp = (x, a=0, b=1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, d) => clamp((t - a) / d);
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const easeIO = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2;
+const back = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(x-1,3) + c1*Math.pow(x-1,2); };
+const fmt = n => n.toLocaleString('pt-BR');
+const root = document.getElementById('root');
+
+// scenes [start, end]
+const S = [[0,6.3],[6.3,10.4],[10.4,14.75],[14.75,19.75],[19.75,26.15],[26.15,33.8],[33.8,44.5],[44.5,53]];
+const TOTAL = 53;
+const SRV_IN = 10.7, SRV_ON = 11.6, SRV_STEP = .38, RED = 15.5;
+const barsEl = document.getElementById('bars');
+S.forEach(() => { const b = document.createElement('div'); b.className='bar'; b.innerHTML='<i></i>'; barsEl.appendChild(b); });
+
+function el(html) { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; }
+
+// word pop: returns style for a word appearing at time a
+function pop(t, a, dur=.38) {
+  const p = prog(t, a, dur);
+  const e = back(p);
+  return `opacity:${clamp(p*2.2)};transform:translateY(${(1-e)*40}px) scale(${.85 + .15*e});`;
+}
+// scene envelope: fade out in last .25s
+function sceneOut(t, end) { return clamp((end - t) / .25); }
+
+// build a line of words with appear times
+function words(t, spec, start, step, cls='') {
+  // spec: array of [text, className]
+  return `<div class="line ${cls}">` + spec.map((w,i) => {
+    const [txt, c] = Array.isArray(w) ? w : [w, ''];
+    return `<span class="w ${c}" style="${pop(t, start + i*step)}">${txt}</span>`;
+  }).join(' ') + `</div>`;
+}
+
+// ---------- servers grid (scenes 3-5) ----------
+function servers(t) {
+  const gx = [130, 346, 562, 778], gy = [820, 1095];
+  let h = '';
+  for (let i = 0; i < 8; i++) {
+    const x = gx[i % 4], y = gy[Math.floor(i / 4)];
+    const appear = SRV_IN + i * .08;
+    const pa = easeOut(prog(t, appear, .4));
+    let border = 'rgba(255,255,255,.08)', led = '#3A3F4C', st = '···', stc = 'rgba(255,255,255,.35)', glow = 'none', bars = 'rgba(255,255,255,.08)';
+    let sc = 1;
+    if (i < 7) {
+      const on = SRV_ON + i * SRV_STEP;
+      if (t >= on) {
+        const k = prog(t, on, .25);
+        border = `rgba(61,220,132,${.25 + .55*k})`; led = '#3DDC84'; st = 'v2 ✓'; stc = '#3DDC84';
+        glow = `0 0 ${40*k}px rgba(61,220,132,${.25*k})`; bars = 'rgba(61,220,132,.25)';
+        sc = 1 + .06 * Math.sin(Math.PI * k);
+      }
+    } else {
+      // server 8: stays old. from 16.4 turns red & pulses
+      if (t >= RED) {
+        const k = prog(t, RED, .3);
+        const pulse = .5 + .5 * Math.sin((t - RED) * 7);
+        border = `rgba(255,77,77,${.5 + .5*pulse*k})`; led = '#FF4D4D'; st = 'v1 ✗'; stc = '#FF4D4D';
+        glow = `0 0 ${30 + 50*pulse*k}px rgba(255,60,60,${.35*k})`; bars='rgba(255,77,77,.25)';
+        sc = 1 + .1 * easeOut(k);
+      }
+    }
+    // in scene 4 dim the 7 good ones
+    let op = pa;
+    if (t >= RED && i < 7) op *= 1 - .6 * prog(t, RED, .4);
+    h += `<div class="srv" style="left:${x}px;top:${y}px;opacity:${op};transform:translateY(${(1-pa)*30}px) scale(${sc});border-color:${border};box-shadow:${glow};z-index:${i==7?2:1}">
+      <div class="nm">SRV ${String(i+1).padStart(2,'0')}</div>
+      <div class="rack"><b style="background:${bars}"></b><b style="background:${bars}"></b><b style="background:${bars}"></b></div>
+      <div class="led" style="background:${led};box-shadow:0 0 16px ${led}"></div>
+      <div class="st" style="color:${stc}">${st}</div>
+    </div>`;
+  }
+  return h;
+}
+
+// ---------- order ticker ----------
+const SYMS = ['NYSE:BAC','NYSE:F','NYSE:GE','NYSE:C','NYSE:T','NYSE:AA','NYSE:KO','NYSE:XOM','NYSE:WMT','NYSE:JPM','NYSE:PFE','NYSE:VZ'];
+function seeded(i) { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
+function ticker(t, start) {
+  const el = t - start;
+  const speed = 6 + el * 3.2; // rows per second, accelerating
+  const n = el * 6 + 1.6 * el * el; // integral of speed
+  let h = '';
+  const rowH = 52;
+  for (let k = 0; k < 11; k++) {
+    const idx = Math.floor(n) - k;
+    if (idx < 0) continue;
+    const frac = n - Math.floor(n);
+    const y = (k + frac) * rowH - rowH + 16;
+    const buy = seeded(idx) > .5;
+    const sym = SYMS[Math.floor(seeded(idx+7) * SYMS.length)];
+    const qty = fmt(Math.floor(100 + seeded(idx+3) * 90) * 100);
+    const op = k === 0 ? frac : clamp(1 - (k - 7) / 4);
+    h += `<div class="row" style="top:${y}px;opacity:${op}">
+      <span style="color:${buy ? '#3DDC84' : '#FF4D4D'};width:200px">${buy ? 'COMPRA' : 'VENDE '}</span>
+      <span style="color:rgba(255,255,255,.85);flex:1">${sym}</span>
+      <span style="color:rgba(255,255,255,.55)">${qty}</span></div>`;
+  }
+  return h;
+}
+
+// ---------- render ----------
+function render(t) {
+  // progress bars
+  [...barsEl.children].forEach((b, i) => {
+    const [a, e] = S[i];
+    b.firstChild.style.width = (prog(t, a, e - a) * 100) + '%';
+  });
+  let glow = 0;
+  let h = '';
+  let shake = 0;
+
+  // S1 hook
+  if (t < S[0][1]) {
+    const o = sceneOut(t, S[0][1]);
+    const cp = easeIO(prog(t, 2.65, 2.3));
+    const val = Math.round(cp * 440000000 / 1000) * 1000;
+    if (t >= 4.95) shake = (1 - prog(t, 4.95, .35)) * 14;
+    glow = .18 * cp;
+    h += `<div class="layer" style="opacity:${o}">
+      <div style="position:absolute;top:640px;left:0;right:0">
+        ${words(t, ['Um', ['deploy.', 'hl-amber']], .02, .3, 'big')}
+        ${words(t, [['45', ''], 'minutos.'], 1.12, .4, 'big')}
+      </div>
+      <div style="position:absolute;top:1020px;left:0;right:0;opacity:${clamp(prog(t,2.55,.3))};transform:scale(${1 + (t>=4.95 ? .08*(1-prog(t,4.95,.4)) : 0)})">
+        <div class="counter">-US$ ${fmt(val)}</div>
+      </div>
+      <div style="position:absolute;top:1190px;left:0;right:0">${words(t, [['de', 'dim'], ['prejuízo.', 'dim']], 4.75, .15, 'small')}</div>
+    </div>`;
+  }
+  // S2 context
+  else if (t < S[1][1]) {
+    const o = sceneOut(t, S[1][1]);
+    const s = S[1][0];
+    const cp = easeOut(prog(t, s + 2.9, .6));
+    h += `<div class="layer" style="opacity:${o}">
+      <div style="position:absolute;top:560px;left:0;right:0;text-align:center;${pop(t, s + .2)}"><span class="tag">AGOSTO DE 2012</span></div>
+      <div style="position:absolute;top:690px;left:0;right:0">
+        ${words(t, ['A', ['Knight', 'hl-amber'], ['Capital', 'hl-amber']], s + .95, .2, 'mid')}
+        ${words(t, ['era', 'gigante', 'em'], s + 1.85, .2, 'mid')}
+        ${words(t, ['Wall', 'Street.'], s + 2.75, .25, 'mid')}
+      </div>
+      <div class="card" style="left:140px;right:140px;top:1080px;height:300px;opacity:${cp};transform:translateY(${(1-cp)*50}px)">
+        <div style="position:absolute;left:44px;top:50px;width:120px;height:120px;border-radius:28px;background:linear-gradient(135deg,#F5B83D,#E0862B);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:54px;color:#0B0B0F">KC</div>
+        <div style="position:absolute;left:200px;top:58px;font-weight:800;font-size:44px">Knight Capital</div>
+        <div style="position:absolute;left:200px;top:120px;font-weight:600;font-size:30px;color:rgba(255,255,255,.5)">Negociação de ações · EUA</div>
+        <div style="position:absolute;left:44px;right:44px;top:210px;display:flex;justify-content:space-between;font-family:'DejaVu Sans Mono',monospace;font-size:28px;color:rgba(255,255,255,.6)">
+          <span>STATUS</span><span style="color:#3DDC84">● OPERANDO</span>
+        </div>
+      </div>
+    </div>`;
+  }
+  // S3 deploy on 8 servers
+  else if (t < S[2][1]) {
+    const o = sceneOut(t, S[2][1]);
+    const s = S[2][0];
+    h += `<div class="layer" style="opacity:${o}">
+      <div style="position:absolute;top:470px;left:0;right:0">
+        ${words(t, ['Atualizaram', 'o', 'sistema'], s + .9, .25, 'mid')}
+        ${words(t, ['em', ['8', 'hl-green'], ['servidores.', 'hl-green']], s + 2.5, .25, 'mid')}
+      </div>
+      ${servers(t)}
+      <div style="position:absolute;top:1420px;left:0;right:0;text-align:center;font-family:'DejaVu Sans Mono',monospace;font-size:32px;color:rgba(255,255,255,.6);opacity:${clamp(prog(t, SRV_ON, .3))}">
+        DEPLOY: <span style="color:#3DDC84">${Math.min(7, Math.max(0, Math.floor((t - SRV_ON) / SRV_STEP) + 1))}</span> / 8
+      </div>
+    </div>`;
+  }
+  // S4 forgot one
+  else if (t < S[3][1]) {
+    const o = sceneOut(t, S[3][1]);
+    const s = S[3][0];
+    glow = .12 * prog(t, RED, .5);
+    const bp = back(prog(t, s + 1.9, .4));
+    h += `<div class="layer" style="opacity:${o}">
+      <div style="position:absolute;top:470px;left:0;right:0">
+        ${words(t, ['Mas', 'esqueceram'], s + .2, .2, 'mid')}
+        ${words(t, [['UM.', 'hl-red']], s + .75, .16, 'mid')}
+      </div>
+      ${servers(t)}
+      <div class="badge" style="left:600px;top:1385px;opacity:${clamp(prog(t, s+1.9, .2))};transform:scale(${.6 + .4*bp}) rotate(-3deg)">CÓDIGO ANTIGO</div>
+      <div style="position:absolute;top:1520px;left:0;right:0">${words(t, [['Desativado', 'dim'], ['havia', 'dim'], ['anos.', 'dim']], s + 3.2, .2, 'small')}</div>
+    </div>`;
+  }
+  // S5 flag + runaway orders
+  else if (t < S[4][1]) {
+    const o = sceneOut(t, S[4][1]);
+    const s = S[4][0];
+    const tp = easeOut(prog(t, s + 3.2, .5));
+    const cp = clamp((t - (s + 3.4)) / 2.9);
+    const val = Math.round(Math.pow(cp, 1.6) * 300000000 / 1000) * 1000;
+    glow = .1 + .12 * cp;
+    h += `<div class="layer" style="opacity:${o}">
+      <div style="position:absolute;top:440px;left:0;right:0">
+        ${words(t, ['Uma', ['flag', 'hl-amber'], 'reaproveitada'], s + .2, .25, 'mid')}
+        ${words(t, ['religou', 'o', ['código', 'hl-red'], ['morto.', 'hl-red']], s + 1.4, .25, 'mid')}
+      </div>
+      <div class="term" style="top:760px;opacity:${tp};transform:translateY(${(1-tp)*60}px)">
+        <div class="tb"><i></i><i></i><i></i><span>● ORDENS AUTOMÁTICAS</span></div>
+        <div class="rows">${t > s + 3.4 ? ticker(t, s + 3.4) : ''}</div>
+      </div>
+      <div style="position:absolute;top:1400px;left:0;right:0;opacity:${tp}">
+        <div class="counter" style="font-size:96px">-US$ ${fmt(val)}</div>
+      </div>
+    </div>`;
+  }
+  // S6 total
+  else if (t < S[5][1]) {
+    const o = sceneOut(t, S[5][1]);
+    const s = S[5][0];
+    const hit = prog(t, s + 1.6, .5);
+    shake = (t >= s + 1.6 && t < s + 2.1) ? (1 - hit) * 18 : 0;
+    glow = .22;
+    const cp = easeOut(prog(t, s + 1.6, .5));
+    h += `<div class="layer" style="opacity:${o}">
+      <div style="position:absolute;top:600px;left:0;right:0;text-align:center;${pop(t, s + .25)}"><span class="tag" style="border-color:rgba(255,77,77,.5);color:#FF4D4D">TEMPO TOTAL: 45 MIN</span></div>
+      <div style="position:absolute;top:730px;left:0;right:0;opacity:${clamp(prog(t, s+1.6, .15))};transform:scale(${1.25 - .25*cp})">
+        <div class="counter" style="font-size:138px">-US$ 440 mi</div>
+      </div>
+      <div style="position:absolute;top:980px;left:0;right:0">
+        ${words(t, ['A', 'empresa', 'quase'], s + 4.6, .2, 'mid')}
+        ${words(t, [['quebrou.', 'hl-red']], s + 5.4, .14, 'mid')}
+      </div>
+      <div style="position:absolute;top:1250px;left:0;right:0">${words(t, [['E', 'dim'], ['acabou', 'dim'], ['sendo', 'dim'], ['vendida.', 'dim']], s + 6.15, .25, 'small')}</div>
+    </div>`;
+  }
+  // S7 lesson + CTA
+  else if (t < S[6][1]) {
+    const o7 = sceneOut(t, S[6][1]);
+    const s = S[6][0];
+    const items = ['Checklist de deploy', 'Teste de regressão', 'Remover código morto'];
+    let ch = '';
+    items.forEach((it, i) => {
+      const a = s + [3.2, 4.75, 6.05][i];
+      const p = easeOut(prog(t, a, .35));
+      const k = prog(t, a + .3, .2);
+      ch += `<div class="check" style="opacity:${p};transform:translateX(${(1-p)*-40}px);margin-bottom:34px">
+        <div class="box" style="background:${k>0?'#3DDC84':'transparent'};border-color:${k>0?'#3DDC84':'rgba(255,255,255,.25)'};transform:scale(${1 + .2*Math.sin(Math.PI*k)})">${k>0?'✓':''}</div>
+        <span style="color:${k>0?'#fff':'rgba(255,255,255,.7)'}">${it}</span></div>`;
+    });
+    const cta = back(prog(t, s + 7.8, .45));
+    h += `<div class="layer" style="opacity:${o7}">
+      <div style="position:absolute;top:470px;left:0;right:0">
+        ${words(t, ['Não', 'faltou', 'dev', 'bom.'], s + .2, .25, 'mid dim')}
+        ${words(t, ['Faltou', ['processo.', 'hl-amber']], s + 1.75, .3, 'mid')}
+      </div>
+      <div style="position:absolute;top:800px;left:170px">${ch}</div>
+      <div style="position:absolute;top:1250px;left:0;right:0;text-align:center;opacity:${clamp(prog(t,s+7.8,.2))};transform:scale(${.7+.3*cta})">
+        <span class="pill">Segue pro Ep. 2 →</span>
+      </div>
+    </div>`;
+  }
+
+  // S8 product
+  else {
+    const s = S[7][0];
+    glow = 0;
+    const lp = back(prog(t, s + 2.4, .5));
+    const feats = [['✦','Cenários gerados com IA'],['▶','Execução com evidência'],['⚑','Bug aberto do teste reprovado']];
+    let fh = '';
+    feats.forEach((f, i) => {
+      const p = easeOut(prog(t, s + 4.4 + i*.4, .35));
+      fh += `<div style="display:flex;align-items:center;gap:26px;padding:26px 34px;margin-bottom:22px;border-radius:22px;background:rgba(30,200,245,.06);border:2px solid rgba(30,200,245,.22);opacity:${p};transform:translateY(${(1-p)*30}px)">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(30,200,245,.15);color:#22C7F2;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900">${f[0]}</div>
+        <span style="font-weight:700;font-size:40px;color:#E8F4FA">${f[1]}</span></div>`;
+    });
+    const cp = back(prog(t, s + 6.2, .45));
+    h += `<div class="layer" style="background:radial-gradient(900px 700px at 50% 30%, rgba(30,200,245,${.16*easeOut(prog(t,s,.6))}) 0%, rgba(0,0,0,0) 70%)">
+      <div style="position:absolute;top:400px;left:0;right:0">
+        ${words(t, ['Pra', 'sua', 'squad', 'não', 'ser'], s + .15, .17, 'small dim')}
+        ${words(t, ['a', 'próxima', ['Knight:', 'hl-red']], s + 1.1, .25, 'small')}
+      </div>
+      <div style="position:absolute;top:590px;left:0;right:0;text-align:center;opacity:${clamp(prog(t,s+2.4,.25))};transform:scale(${.8+.2*lp})">
+        <div style="font-weight:800;font-size:132px;letter-spacing:-4px;line-height:1"><span style="color:#fff">testcase</span><span style="color:#22C7F2;text-shadow:0 0 50px rgba(34,199,242,.6)">AI</span></div>
+        <div style="margin-top:26px;font-weight:600;font-size:40px;color:rgba(232,244,250,.7)">Do requisito ao release,<br>sem lacunas de qualidade.</div>
+      </div>
+      <div style="position:absolute;top:960px;left:110px;right:110px">${fh}</div>
+      <div style="position:absolute;top:1430px;left:0;right:0;text-align:center;opacity:${clamp(prog(t,s+6.2,.2))};transform:scale(${.7+.3*cp})">
+        <span class="pill" style="background:#22C7F2;box-shadow:0 16px 50px rgba(34,199,242,.4)">testcaseai.com.br</span>
+      </div>
+    </div>`;
+  }
+
+  root.innerHTML = h;
+  const sx = shake ? (Math.sin(t * 90) * shake) : 0, sy = shake ? (Math.cos(t * 73) * shake) : 0;
+  root.style.transform = `translate(${sx}px, ${sy}px)`;
+  document.getElementById('bg').style.setProperty('--glow', glow);
+}
+window.render = render;
+window.SCENES = S;
+render(0);
+</script>
+</body>
+</html>
