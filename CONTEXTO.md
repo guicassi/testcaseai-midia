@@ -44,7 +44,7 @@ O LinkedIn recebe só os posts de dia útil, sempre com legenda própria. As pal
 
 ## Série "Bugs que custaram caro" (formato em teste)
 
-- Reels longos (44–60 s), narrados, sobre incidentes reais e públicos de software. Publicados às TERÇAS no lugar do Reel do dia: Ep. 1 Knight Capital (17/11), Ep. 2 Tela azul (24/11), Ep. 3 WhatsApp sumiu (01/12).
+- Reels longos (44–60 s), narrados, sobre incidentes reais e públicos de software. Publicados às TERÇAS no lugar do Reel do dia (o Ep. 1 foi antecipado para a quinta 12/11 e o Reel Quiz foi para 17/11): Ep. 1 Knight Capital (12/11), Ep. 2 Tela azul (24/11), Ep. 3 WhatsApp sumiu (01/12).
 - Produzidos fora do gerador (animação própria + narração do ElevenLabs). Arquivos em `reels/AAAA-MM-DD-bugs-que-custaram-caro-epN-*.mp4`. Não há roteiro JSON: ajustes de vídeo devem ser pedidos no chat de produção, não aplicados pela publicação diária.
 - Exceções aprovadas pelo usuário: duração acima de 22 s e citação dos nomes das empresas envolvidas nos incidentes (casos históricos públicos). Fora da série, a regra de não citar empresas continua valendo.
 - Fechamento padrão: cartão do testcaseAI (Do requisito ao release, sem lacunas de qualidade · testcaseai.com.br).
