@@ -109,10 +109,16 @@
       "formato": "frase de impacto"
     },
     {
-      "data": "2026-11-12",
+      "data": "2026-11-11",
       "tipo": "reel",
       "cor": "escura",
       "formato": "serie-bugs-que-custaram-caro"
+    },
+    {
+      "data": "2026-11-12",
+      "tipo": "reel",
+      "cor": "escura",
+      "formato": "classico"
     },
     {
       "data": "2026-11-13",
@@ -137,12 +143,6 @@
       "tipo": "reel",
       "cor": "escura",
       "formato": "serie-bugs-que-custaram-caro"
-    },
-    {
-      "data": "2026-11-19",
-      "tipo": "reel",
-      "cor": "escura",
-      "formato": "classico"
     },
     {
       "data": "2026-11-24",

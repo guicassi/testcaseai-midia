@@ -47,7 +47,7 @@ Por semana: 7 Reels (6 do gerador, sem repetir estilo, + 1 episódio da série) 
 
 ## Série "Bugs que custaram caro" (formato em teste)
 
-Reels narrados (45–60 s) sobre incidentes reais de software, às terças. Tudo sobre a série (episódios, fluxo semi-automático com voz do ElevenLabs, passo a passo de montagem, pauta) está em `serie/README.md` e `serie/pauta.md`. Datas: Ep. 1 (Knight Capital) 12/11, Ep. 2 (tela azul) 17/11, Ep. 3 (WhatsApp) 24/11. Exceções aprovadas: duração acima de 22 s e nomes das empresas dos incidentes. Ajustes de vídeo da série são feitos no chat de produção, não pela publicação diária.
+Reels narrados (45–60 s) sobre incidentes reais de software, às terças. Tudo sobre a série (episódios, fluxo semi-automático com voz do ElevenLabs, passo a passo de montagem, pauta) está em `serie/README.md` e `serie/pauta.md`. Datas: Ep. 1 (Knight Capital) 11/11 às 17h47, Ep. 2 (tela azul) 17/11, Ep. 3 (WhatsApp) 24/11. Exceções aprovadas: duração acima de 22 s e nomes das empresas dos incidentes. Ajustes de vídeo da série são feitos no chat de produção, não pela publicação diária.
 
 ## Regras de conteúdo
 

@@ -4,7 +4,7 @@ Reels narrados (45–60 s) sobre incidentes reais e públicos de software, sempr
 
 | Ep. | História | Data | Pasta | Vídeo final |
 |---|---|---|---|---|
-| 1 | Knight Capital, 2012 (deploy esquecido em 1 de 8 servidores) | 12/11/2026 (QUI, antecipado) | `ep1-knight/` | `reels/2026-11-17-bugs-que-custaram-caro-ep1-knight.mp4` |
+| 1 | Knight Capital, 2012 (deploy esquecido em 1 de 8 servidores) | 11/11/2026 (QUA 18H, antecipado) | `ep1-knight/` | `reels/2026-11-17-bugs-que-custaram-caro-ep1-knight.mp4` |
 | 2 | O dia da tela azul, 19/07/2024 (atualização com 21 entradas x 20) | 17/11/2026 | `ep2-tela-azul/` | `reels/2026-11-24-bugs-que-custaram-caro-ep2-tela-azul.mp4` |
 | 3 | O dia em que o WhatsApp sumiu, 04/10/2021 (comando de manutenção + bug na auditoria) | 24/11/2026 | `ep3-whatsapp/` | `reels/2026-12-01-bugs-que-custaram-caro-ep3-whatsapp.mp4` |
 
