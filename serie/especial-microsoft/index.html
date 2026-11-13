@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #06080D; }
+  body { font-family: 'Inter', sans-serif; color: #F2F3F5; -webkit-font-smoothing: antialiased; }
+  .mono { font-family: 'DejaVu Sans Mono', monospace; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .bg { position: absolute; inset: 0;
+    background: radial-gradient(900px 700px at 50% 38%, rgba(45,127,249,var(--glow,0)) 0%, rgba(0,0,0,0) 70%),
+                radial-gradient(1200px 900px at 50% 40%, #10141D 0%, #06080D 70%); }
+  .grid { position: absolute; inset: 0; opacity: .45;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 60px 60px; -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 30%, transparent 75%); }
+  .vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.6) 100%); pointer-events:none; }
+  #header { position: absolute; top: 120px; left: 90px; right: 90px; }
+  .kicker { font-weight: 800; font-size: 34px; letter-spacing: 6px; color: #F5B83D; }
+  .sub { font-weight: 600; font-size: 28px; letter-spacing: 4px; color: rgba(255,255,255,.45); margin-top: 10px; }
+  .rec { display:inline-block; width: 14px; height: 14px; border-radius: 50%; background:#FF4747; margin-right: 14px; vertical-align: 3px; box-shadow: 0 0 14px #FF4747; }
+  .bars { display: flex; gap: 10px; margin-top: 30px; }
+  .bar { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0%; background: #F5B83D; border-radius: 4px; }
+  #root { position: absolute; inset: 0; }
+  .layer { position: absolute; inset: 0; }
+  .w { display: inline-block; }
+  .line { text-align: center; white-space: nowrap; }
+  .mid { font-weight: 800; font-size: 82px; letter-spacing: -2px; line-height: 1.12; }
+  .small { font-weight: 600; font-size: 46px; line-height: 1.3; }
+  .dim { color: rgba(255,255,255,.55); }
+  .hl-blue { color: #4C9BFF; } .hl-red { color: #FF4D4D; } .hl-green { color: #3DDC84; } .hl-amber { color: #F5B83D; }
+  #subs { position: absolute; left: 70px; right: 70px; top: 1500px; text-align: center; }
+  #subs span { display: inline-block; font-weight: 800; font-size: 46px; line-height: 1.25; padding: 14px 26px; border-radius: 16px; background: rgba(0,0,0,.55); color: #fff; }
+  .notif { position: absolute; left: 90px; right: 90px; height: 170px; border-radius: 34px; background: rgba(38,42,54,.92); border: 2px solid rgba(255,255,255,.08); display:flex; align-items:center; gap: 30px; padding: 0 36px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .notif .ic { width: 96px; height: 96px; border-radius: 24px; display:flex; align-items:center; justify-content:center; font-size: 56px; font-weight: 900; color:#fff; flex: none; }
+  .notif .tt { font-weight: 800; font-size: 38px; }
+  .notif .bd { font-weight: 500; font-size: 32px; color: rgba(255,255,255,.7); margin-top: 6px; }
+  .notif .tm { position:absolute; right: 34px; top: 26px; font-size: 26px; color: rgba(255,255,255,.4); }
+  .pill { display:inline-block; font-weight: 800; font-size: 44px; padding: 26px 46px; border-radius: 999px; }
+  .tag { display:inline-block; font-family: 'DejaVu Sans Mono', monospace; font-size: 30px; letter-spacing: 3px; padding: 12px 22px; border-radius: 12px; border: 2px solid rgba(255,255,255,.18); color: rgba(255,255,255,.75); background: rgba(255,255,255,.04); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg" id="bg"></div>
+  <div class="grid"></div>
+  <canvas id="map" width="960" height="420" style="position:absolute;left:60px;top:0;opacity:0"></canvas>
+  <div id="root"></div>
+  <div id="header">
+    <div class="kicker"><span class="rec"></span>BUGS QUE CUSTARAM CARO</div>
+    <div class="sub">ESPECIAL · A QUEDA DA MICROSOFT</div>
+    <div class="bars" id="bars"></div>
+  </div>
+  <div id="subs"></div>
+  <div class="vignette"></div>
+</div>
+<script>
+
+const clamp = (x, a=0, b=1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, d) => clamp((t - a) / d);
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const easeIO = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2;
+const back = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(x-1,3) + c1*Math.pow(x-1,2); };
+const fmt = n => n.toLocaleString('pt-BR');
+const pad = n => String(n).padStart(2, '0');
+function rnd(i) { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); }
+function pop(t, a, dur=.38) { const p = prog(t, a, dur), e = back(p); return `opacity:${clamp(p*2.2)};transform:translateY(${(1-e)*40}px) scale(${.85+.15*e});`; }
+function words(t, spec, start, step, cls='') {
+  return `<div class="line ${cls}">` + spec.map((w,i) => { const [txt,c] = Array.isArray(w) ? w : [w,'']; return `<span class="w ${c}" style="${pop(t, start+i*step)}">${txt}</span>`; }).join(' ') + `</div>`;
+}
+const root = document.getElementById('root');
+
+
+// ---------- world map (dots) ----------
+const P = {
+ na: [[-168,66],[-140,70],[-95,72],[-80,62],[-60,55],[-55,48],[-67,45],[-75,35],[-81,25],[-97,26],[-97,18],[-87,15],[-83,9],[-78,8],[-105,22],[-112,30],[-118,34],[-124,40],[-125,48],[-135,58],[-150,60],[-165,60]],
+ gl: [[-55,60],[-45,60],[-20,70],[-20,80],[-60,82],[-70,77]],
+ sa: [[-80,10],[-62,11],[-50,0],[-35,-6],[-40,-22],[-48,-28],[-58,-38],[-65,-48],[-70,-55],[-75,-50],[-72,-30],[-70,-18],[-81,-6]],
+ eu: [[-10,36],[-9,44],[-2,48],[-5,58],[5,62],[15,70],[30,71],[40,68],[40,45],[28,41],[20,40],[12,44],[3,43]],
+ uk: [[-6,50],[2,51],[-2,58],[-6,58]],
+ af: [[-17,21],[-16,14],[-8,5],[8,4],[10,-2],[13,-12],[12,-18],[18,-35],[26,-34],[33,-26],[40,-15],[40,-3],[51,11],[43,12],[33,28],[32,31],[10,37],[-6,36],[-10,30]],
+ as: [[40,68],[60,70],[80,74],[105,78],[140,72],[180,68],[175,62],[160,60],[140,52],[130,42],[122,30],[120,22],[108,18],[105,10],[103,1],[100,13],[98,8],[92,21],[88,22],[80,15],[77,8],[72,20],[65,25],[57,25],[52,15],[43,12],[35,30],[28,41],[40,45]],
+ id: [[95,5],[105,-6],[120,-9],[140,-8],[140,-2],[118,4],[108,1]],
+ jp: [[130,31],[142,35],[145,44],[140,45]],
+ au: [[114,-22],[123,-17],[131,-12],[137,-12],[142,-11],[146,-19],[153,-26],[150,-37],[141,-38],[131,-31],[117,-35],[114,-27]],
+};
+function inPoly(x, y, poly) { let c = false; for (let i = 0, j = poly.length-1; i < poly.length; j = i++) { const [xi,yi] = poly[i], [xj,yj] = poly[j]; if (((yi > y) != (yj > y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) c = !c; } return c; }
+const DOTS = [];
+const MW = 960, MH = 420, STEP = 3.3;
+for (let lat = 80; lat >= -58; lat -= STEP) for (let lon = -178; lon <= 180; lon += STEP) {
+  if (Object.values(P).some(p => inPoly(lon, lat, p))) {
+    const x = (lon + 180) / 360 * MW, y = (80 - lat) / 140 * MH;
+    DOTS.push({x, y, r: rnd(DOTS.length + 1), lon});
+  }
+}
+const cv = document.getElementById('map'), cx = cv.getContext('2d');
+// infection: fraction f in [0,1]; each dot turns blue when its threshold < f
+function drawMap(f, opacity, top, flash) {
+  cv.style.opacity = opacity; cv.style.top = top + 'px';
+  cx.clearRect(0, 0, MW, MH);
+  for (let i = 0; i < DOTS.length; i++) {
+    const d = DOTS[i];
+    const th = .08 + .9 * (0.6*d.r + 0.4*((d.lon + 180) / 360)); // spread with timezone bias
+    const on = f >= th;
+    if (on) {
+      const k = clamp((f - th) / .06);
+      cx.fillStyle = `rgba(${Math.round(150 - 100*k)},${Math.round(160 - 30*k)},255,1)`;
+      cx.beginPath(); cx.arc(d.x, d.y, 3.6 + 2.5*(1-k) + flash, 0, 6.283); cx.fill();
+    } else {
+      cx.fillStyle = 'rgba(255,255,255,.16)';
+      cx.beginPath(); cx.arc(d.x, d.y, 3.2, 0, 6.283); cx.fill();
+    }
+  }
+}
+
+
+// ===== Especial: a queda da Microsoft (12–13/11/2026) =====
+// PH = início de cada frase da narração (s); END = fim da fala. Ajuste com setTiming() após detectar as pausas do áudio.
+let PH = [0, 2.53, 4.04, 6.04, 9.71, 14.61, 16.44, 22.89, 25.25, 27.77, 32.25, 37.64, 39.29, 43.82, 47.34, 50.0, 58.69, 60.69, 62.19];
+let END = 63.64;
+const TXT = ['Quinta-feira, duas e meia da tarde.', 'O Outlook não abre.', 'O Teams não marca reunião.',
+  'Em uma hora, a falha chegou a 74 países.',
+  'Em Taiwan, uma empresa financeira voltou a usar fax pra confirmar operações.',
+  'E não foi ataque hacker.',
+  'Os servidores começaram a ser reprovados no health check, o teste automático que diz se um servidor está saudável.',
+  'Reprovados, saíram do ar.', 'E os que sobraram não aguentaram a carga.',
+  'Reiniciar não resolvia: eles caíam de novo assim que o tráfego voltava.',
+  'E a Microsoft investiga se tudo começou com uma mudança recente nesse mesmo componente.',
+  'Agora pensa no seu time.',
+  'Quando vocês mudam algo crítico, existe cenário de teste pra quando dá errado?',
+  'Alguém já testou o que acontece se metade dos servidores cair?',
+  'Esse cenário quase nunca está escrito.',
+  'O testcaseAI analisa o requisito antes do código, aponta os cenários de falha que faltam e gera os testes pra rodar antes do release.'];
+let S = [];
+function buildScenes() {
+  const c = i => PH[i] - .2;
+  S = [[0, c(3)], [c(3), c(5)], [c(5), c(9)], [c(9), c(11)], [c(11), c(14)], [c(14), c(16)], [c(16), END + 1.4]];
+  window.SCENES = S;
+}
+buildScenes();
+const barsEl = document.getElementById('bars');
+function buildBars() { barsEl.innerHTML = ''; S.slice(1).forEach(() => { const b = document.createElement('div'); b.className = 'bar'; b.innerHTML = '<i></i>'; barsEl.appendChild(b); }); }
+buildBars();
+window.setTiming = (ph, end) => { PH = ph; END = end; buildScenes(); buildBars(); };
+
+function subs(t) {
+  for (let i = 0; i < TXT.length; i++) {
+    const a = PH[i] - .1, b = (i + 1 < PH.length ? PH[i + 1] : END) - .15;
+    if (t >= a && t < b) { const o = Math.min(prog(t, a, .12), clamp((b - t) / .12)); return `<span style="opacity:${o}">${TXT[i]}</span>`; }
+  }
+  return '';
+}
+
+function drawMapRed(f, opacity, top) {
+  cv.style.opacity = opacity; cv.style.top = top + 'px';
+  cx.clearRect(0, 0, MW, MH);
+  for (let i = 0; i < DOTS.length; i++) {
+    const d = DOTS[i]; const th = .05 + .9 * d.r;
+    if (f >= th) { const k = clamp((f - th) / .08); cx.fillStyle = `rgba(255,${Math.round(77 + 120 * (1 - k))},77,${1 - .3 * k})`; cx.beginPath(); cx.arc(d.x, d.y, 3.4 + 2 * (1 - k), 0, 6.283); cx.fill(); }
+    else { cx.fillStyle = 'rgba(255,255,255,.16)'; cx.beginPath(); cx.arc(d.x, d.y, 3.2, 0, 6.283); cx.fill(); }
+  }
+}
+
+function appWin(t, a, top, color, letter, name, body, status) {
+  const p = back(prog(t, a, .4));
+  const spin = ['◐', '◓', '◑', '◒'][Math.floor(t * 8) % 4];
+  return `<div style="position:absolute;left:110px;right:110px;top:${top}px;border-radius:30px;background:linear-gradient(180deg,#191D27,#12151C);border:2px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden;opacity:${clamp(prog(t, a, .2))};transform:translateY(${(1 - p) * 60}px) scale(${.92 + .08 * p})">
+    <div style="height:90px;display:flex;align-items:center;gap:20px;padding:0 30px;border-bottom:2px solid rgba(255,255,255,.06)">
+      <div style="width:58px;height:58px;border-radius:14px;background:${color};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:32px">${letter}</div>
+      <div style="font-weight:800;font-size:36px">${name}</div>
+      <div class="mono" style="margin-left:auto;font-size:24px;color:#FF4D4D">● OFFLINE</div></div>
+    <div style="padding:40px 36px;display:flex;align-items:center;gap:30px">
+      <div style="font-size:70px;color:rgba(255,255,255,.5)">${spin}</div>
+      <div><div style="font-weight:700;font-size:38px">${body}</div><div style="font-size:28px;color:rgba(255,255,255,.5);margin-top:8px">${status}</div></div></div>
+  </div>`;
+}
+
+function card(t, a, top, icon, iconBg, tag, title, body) {
+  const p = back(prog(t, a, .45));
+  return `<div style="position:absolute;left:100px;right:100px;top:${top}px;border-radius:30px;padding:36px 38px;background:linear-gradient(180deg,#1A1D26,#12141B);border:2px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;gap:30px;align-items:flex-start;opacity:${clamp(prog(t, a, .2))};transform:translateY(${(1 - p) * 70}px) rotate(${(1 - p) * -3}deg)">
+    <div style="width:120px;height:120px;flex:none;border-radius:28px;background:${iconBg};display:flex;align-items:center;justify-content:center;font-size:64px">${icon}</div>
+    <div><div class="mono" style="font-size:26px;letter-spacing:4px;color:#F5B83D">${tag}</div>
+      <div style="font-weight:800;font-size:44px;margin-top:8px;line-height:1.15">${title}</div>
+      <div style="font-size:30px;color:rgba(255,255,255,.6);margin-top:10px;line-height:1.3">${body}</div></div></div>`;
+}
+
+// 12 servers grid; state per server
+const FAIL = [0, 2, 3, 5, 7, 8, 10];
+function serverGrid(t) {
+  let h = '';
+  const scanStart = PH[6] + 1.2, step = .38;
+  for (let i = 0; i < 12; i++) {
+    const col = i % 4, row = Math.floor(i / 4);
+    const x = 130 + col * 216, y = 700 + row * 240;
+    const scanned = t >= scanStart + i * step;
+    const fail = FAIL.includes(i);
+    const off = fail && t >= PH[7] + FAIL.indexOf(i) * .12;
+    const load = fail ? (off ? 0 : .3) : (t >= PH[8] ? easeIO(prog(t, PH[8] + i * .06, 1.6)) * .7 + .3 : .3);
+    const over = load > .9;
+    const pulse = over ? .5 + .5 * Math.sin(t * 9 + i) : 0;
+    const ap = easeOut(prog(t, PH[6] + .1 + i * .04, .35));
+    const scanning = t >= scanStart + i * step - .2 && t < scanStart + i * step + .15;
+    let border = 'rgba(61,220,132,.5)', label = `<span style="color:#3DDC84">${Math.round(load * 100)}%</span>`;
+    if (scanned && fail && !off) { border = '#FF4D4D'; label = '<span style="color:#FF4D4D">✗ REPROVADO</span>'; }
+    if (off) { border = 'rgba(255,255,255,.06)'; label = '<span style="color:rgba(255,255,255,.4)">FORA DO AR</span>'; }
+    if (!fail && over) { border = `rgba(255,77,77,${.5 + .5 * pulse})`; label = `<span style="color:#FF4D4D">${Math.round(load * 100)}%</span>`; }
+    else if (!fail && load > .6) { border = '#F5B83D'; label = `<span style="color:#F5B83D">${Math.round(load * 100)}%</span>`; }
+    h += `<div style="position:absolute;left:${x}px;top:${y}px;width:190px;height:210px;border-radius:22px;background:#151821;border:3px solid ${scanning ? '#4C9BFF' : border};opacity:${ap * (off ? .35 : 1)};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:${scanning ? '0 0 30px rgba(76,155,255,.6)' : over ? `0 0 ${30 * pulse}px rgba(255,60,60,.5)` : 'none'}">
+      <div class="mono" style="font-size:22px;color:rgba(255,255,255,.5)">SRV ${String(i + 1).padStart(2, '0')}</div>
+      <div style="width:120px;height:14px;border-radius:7px;background:rgba(255,255,255,.08);overflow:hidden"><div style="height:100%;width:${off ? 0 : load * 100}%;background:${over ? '#FF4D4D' : load > .6 ? '#F5B83D' : '#3DDC84'}"></div></div>
+      <div class="mono" style="font-size:22px;font-weight:700">${label}</div></div>`;
+  }
+  return h;
+}
+
+function render(t) {
+  [...barsEl.children].forEach((b, i) => { const [a, e] = S[i + 1]; b.firstChild.style.width = (prog(t, a, e - a) * 100) + '%'; });
+  let h = '', glow = 0, mapF = 0, mapO = 0, mapTop = 1000, shake = 0, headerO = 1, subTop = 1540;
+  const sc = S.findIndex(([a, e]) => t >= a && t < e);
+  const [s, e] = S[sc < 0 ? S.length - 1 : sc];
+  const out = clamp((e - t) / .2);
+
+  if (sc === 0) {
+    headerO = 0;
+    const cp = easeOut(prog(t, .1, .4));
+    h = `<div class="layer" style="opacity:${out}">
+      <div style="position:absolute;top:330px;left:0;right:0;text-align:center;opacity:${cp}">
+        <div class="mono" style="font-size:38px;letter-spacing:8px;color:rgba(255,255,255,.55)">QUINTA-FEIRA · 12/11</div>
+        <div class="mono" style="font-size:150px;font-weight:700;letter-spacing:-4px">14:30</div></div>
+      ${appWin(t, PH[1], 700, '#2F6BEA', 'O', 'E-mail', 'Não foi possível conectar', 'Tentando novamente...')}
+      ${appWin(t, PH[2], 990, '#5B5FC7', 'T', 'Calendário', 'Não foi possível agendar', 'Reunião não salva')}
+    </div>`;
+  }
+  else if (sc === 1) {
+    headerO = prog(t, s, .3);
+    const cn = Math.round(easeOut(prog(t, PH[3] + 1.2, 2.2)) * 74);
+    const showFax = t >= PH[4] - .1;
+    h = `<div class="layer" style="opacity:${out}">
+      <div style="position:absolute;top:400px;left:0;right:0;text-align:center;transform:scale(${showFax ? 1 - .35 * easeOut(prog(t, PH[4] - .1, .4)) : 1});transform-origin:center top">
+        <div style="font-weight:900;font-size:200px;letter-spacing:-6px;line-height:1;color:#FF4D4D;text-shadow:0 0 50px rgba(255,60,60,.45)">${cn}</div>
+        <div style="font-weight:700;font-size:48px;color:rgba(255,255,255,.8);margin-top:10px">países em 1 hora</div></div>
+      ${showFax ? card(t, PH[4], 880, '<span class="mono" style="font-size:34px;font-weight:700">FAX</span>', '#3A3F4C', 'TAIWAN', 'Operações confirmadas por fax', 'Uma empresa financeira voltou ao fax; outra cancelou uma operação de recompra de títulos.') : ''}
+    </div>`;
+    mapO = prog(t, s + .1, .3) * clamp((PH[4] - .1 - t) / .25 + (t < PH[4] - .1 ? 1 : 0)) * out; mapTop = 860; mapF = easeIO(prog(t, PH[3] + 1.0, 2.6)); glow = .08;
+  }
+  else if (sc === 2) {
+    const sh = back(prog(t, PH[5] + .15, .4));
+    let title = '';
+    if (t >= PH[6] && t < PH[7]) title = words(t, ['Reprovados', 'no'], PH[6] + .1, .15, 'mid') + words(t, [['health', 'hl-blue'], ['check', 'hl-blue']], PH[6] + .4, .15, 'mid');
+    else if (t >= PH[7] && t < PH[8]) title = words(t, ['Reprovados,', ['saíram', 'hl-red'], ['do', 'hl-red'], ['ar.', 'hl-red']], PH[7], .15, 'mid');
+    else if (t >= PH[8]) title = words(t, ['O', 'resto', ['não', 'hl-red'], ['aguentou.', 'hl-red']], PH[8], .15, 'mid');
+    h = `<div class="layer" style="opacity:${out}">
+      ${t < PH[6] ? `<div style="position:absolute;top:760px;left:0;right:0;text-align:center;opacity:${clamp(prog(t, PH[5] + .15, .2))};transform:scale(${.6 + .4 * sh})">
+        <span class="pill" style="background:rgba(61,220,132,.12);border:3px solid #3DDC84;color:#3DDC84">✓ Não foi ataque hacker</span></div>` : `
+      <div style="position:absolute;top:400px;left:0;right:0">${title}</div>
+      <div style="position:absolute;top:610px;left:0;right:0;text-align:center;font-weight:600;font-size:30px;color:rgba(255,255,255,.55);opacity:${clamp(prog(t, PH[6] + .6, .3))}">teste automático que diz se o servidor está saudável</div>
+      ${serverGrid(t)}`}
+    </div>`;
+    if (t >= PH[8] + 1.2) glow = .1;
+  }
+  else if (sc === 3) {
+    if (t < PH[10] - .1) {
+      const ss = s + .3, ee = PH[10] - .1;
+      const dur = (ee - ss) / 3;
+      const k = Math.max(0, t - ss);
+      const cyc = Math.min(2, Math.floor(k / dur)), ph = Math.min(1, (k - cyc * dur) / dur);
+      let st, col, traffic = 0;
+      if (ph < .3) { st = 'REINICIANDO...'; col = '#F5B83D'; }
+      else if (ph < .5) { st = '✓ ONLINE'; col = '#3DDC84'; }
+      else if (ph < .8) { st = 'RECEBENDO TRÁFEGO'; col = '#4C9BFF'; traffic = (ph - .5) / .3; }
+      else { st = '✗ CAIU DE NOVO'; col = '#FF4D4D'; }
+      if (ph >= .8 && ph < .86) shake = 8;
+      let arrows = '';
+      for (let a = 0; a < 6; a++) { const x = ((traffic * 1.6 + a / 6) % 1); if (traffic > 0) arrows += `<div style="position:absolute;left:${60 + x * 230}px;top:${1010 + (a % 3) * 60}px;font-size:46px;color:#4C9BFF;opacity:${1 - x}">➜</div>`; }
+      h = `<div class="layer" style="opacity:${clamp((PH[10] - .1 - t) / .2)}">
+        <div style="position:absolute;top:400px;left:0;right:0">${words(t, ['Reiniciar', ['não', 'hl-red'], ['resolvia', 'hl-red']], PH[9], .18, 'mid')}</div>
+        <div class="mono" style="position:absolute;top:560px;left:0;right:0;text-align:center;font-size:34px;color:rgba(255,255,255,.6)">tentativa ${cyc + 1}</div>
+        ${arrows}
+        <div style="position:absolute;left:330px;top:880px;width:420px;height:440px;border-radius:36px;background:#151821;border:5px solid ${col};box-shadow:0 0 50px ${col}55;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px">
+          <div class="mono" style="font-size:30px;color:rgba(255,255,255,.5)">SERVIDOR</div>
+          <div style="display:flex;flex-direction:column;gap:12px">${[0, 1, 2].map(() => `<b style="display:block;width:240px;height:18px;border-radius:9px;background:${col}55"></b>`).join('')}</div>
+          <div class="mono" style="font-size:34px;font-weight:700;color:${col};text-align:center">${st}</div></div>
+      </div>`;
+    } else {
+      const chain = [['Mudança recente', '#F5B83D'], ['Componente do health check', '#4C9BFF'], ['Servidores reprovados', '#FF4D4D']];
+      let ch = '';
+      chain.forEach(([n, c], i) => {
+        const a = PH[10] + .6 + i * 1.2; const p = back(prog(t, a, .4));
+        ch += `<div style="position:absolute;left:150px;right:150px;top:${640 + i * 230}px;padding:34px;border-radius:26px;border:3px solid ${c};background:${c}18;text-align:center;font-weight:800;font-size:46px;opacity:${clamp(prog(t, a, .2))};transform:scale(${.7 + .3 * p})">${n}</div>`;
+        if (i < 2) ch += `<div style="position:absolute;left:0;right:0;top:${640 + i * 230 + 140}px;text-align:center;font-size:60px;color:rgba(255,255,255,.4);opacity:${clamp(prog(t, a + .6, .2))}">↓</div>`;
+      });
+      h = `<div class="layer" style="opacity:${out}">
+        <div style="position:absolute;top:420px;left:0;right:0;text-align:center;${pop(t, PH[10])}"><span class="tag" style="border-color:rgba(245,184,61,.5);color:#F5B83D">EM INVESTIGAÇÃO</span></div>${ch}</div>`;
+    }
+  }
+  else if (sc === 4) {
+    const qs = [['Existe cenário de teste pra quando a mudança dá errado?', PH[12] + .3], ['Alguém testou o que acontece se metade dos servidores cair?', PH[13] + .3]];
+    let qh = '';
+    qs.forEach(([q, a], i) => { const p = back(prog(t, a, .45));
+      qh += `<div style="position:absolute;left:100px;right:100px;top:${720 + i * 300}px;display:flex;gap:30px;align-items:center;padding:36px;border-radius:28px;background:rgba(245,184,61,.07);border:3px solid rgba(245,184,61,.45);opacity:${clamp(prog(t, a, .2))};transform:scale(${.8 + .2 * p})">
+        <div style="width:90px;height:90px;flex:none;border-radius:22px;border:5px dashed rgba(245,184,61,.8);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:56px;color:#F5B83D">?</div>
+        <div style="font-weight:800;font-size:44px;line-height:1.2">${q}</div></div>`; });
+    h = `<div class="layer" style="opacity:${out}">
+      <div style="position:absolute;top:420px;left:0;right:0">${words(t, ['E', 'no', ['seu', 'hl-amber'], ['time?', 'hl-amber']], PH[11], .18, 'mid')}</div>
+      ${qh}
+    </div>`;
+  }
+  else if (sc === 5) {
+    // product in action
+    const showUI = t >= PH[15] - .1;
+    const sp = easeOut(prog(t, PH[15], .5));
+    const score = Math.round(easeOut(prog(t, PH[15] + 1.0, 1.2)) * 58);
+    const gap = back(prog(t, PH[15] + 2.4, .45));
+    const scen = [['50% dos servidores reprovados de uma vez', 4.3], ['Servidor reiniciado recebendo tráfego cheio', 5.1], ['Liberação gradual da mudança', 5.9]];
+    let sh = '';
+    scen.forEach(([n, d], i) => { const p = easeOut(prog(t, PH[15] + d, .35));
+      sh += `<div style="display:flex;align-items:center;gap:20px;padding:20px 26px;margin-top:14px;border-radius:18px;background:rgba(30,200,245,.07);border:2px solid rgba(30,200,245,.3);opacity:${p};transform:translateX(${(1 - p) * 40}px)">
+        <span style="color:#22C7F2;font-weight:900;font-size:30px">✦</span><span style="font-weight:700;font-size:32px">${n}</span></div>`; });
+    const ready = clamp(prog(t, PH[15] + 7.3, .3));
+    h = `<div class="layer" style="opacity:${out}">
+      ${!showUI ? `<div style="position:absolute;top:700px;left:60px;right:60px;text-align:center">${words(t, ['Esse', 'cenário', 'quase'], PH[14], .16, 'mid')}${words(t, [['nunca', 'hl-red'], 'está', 'escrito.'], PH[14] + .6, .16, 'mid')}</div>` : `
+      <div style="position:absolute;top:360px;left:0;right:0;text-align:center;opacity:${sp}"><span style="font-weight:800;font-size:56px"><span>testcase</span><span style="color:#22C7F2">AI</span> em ação</span></div>
+      <div style="position:absolute;left:80px;right:80px;top:480px;border-radius:30px;background:linear-gradient(180deg,#141B26,#0F141C);border:2px solid rgba(34,199,242,.3);padding:34px;opacity:${sp};transform:translateY(${(1 - sp) * 50}px)">
+        <div class="mono" style="font-size:24px;letter-spacing:3px;color:rgba(255,255,255,.5)">HISTÓRIA DE USUÁRIO</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <div style="font-weight:800;font-size:40px">Mudança no health check</div>
+          <div style="text-align:center"><div style="font-weight:900;font-size:56px;color:${score < 70 ? '#F5B83D' : '#3DDC84'}">${score}</div><div class="mono" style="font-size:20px;color:rgba(255,255,255,.5)">SCORE</div></div></div>
+        <div style="margin-top:20px;padding:22px 26px;border-radius:18px;background:rgba(255,77,77,.1);border:2px solid rgba(255,77,77,.55);opacity:${clamp(prog(t, PH[15] + 2.4, .2))};transform:scale(${.85 + .15 * gap})">
+          <div class="mono" style="font-size:22px;letter-spacing:3px;color:#FF4D4D">⚠ LACUNA</div>
+          <div style="font-weight:700;font-size:34px;margin-top:6px">E se o check reprovar muitos servidores de uma vez?</div></div>
+        <div class="mono" style="font-size:24px;letter-spacing:3px;color:rgba(255,255,255,.5);margin-top:26px;opacity:${clamp(prog(t, PH[15] + 4.0, .2))}">CENÁRIOS DE FALHA GERADOS</div>
+        ${sh}
+        <div style="margin-top:24px;text-align:right;opacity:${ready}"><span class="mono" style="font-size:28px;color:#3DDC84;font-weight:700">▶ Pronto pra rodar antes do release</span></div>
+      </div>`}
+    </div>`;
+  }
+  else {
+    const lp = back(prog(t, PH[16], .5));
+    const cp = back(prog(t, PH[18] + .5, .45));
+    h = `<div class="layer" style="background:radial-gradient(900px 700px at 50% 35%, rgba(30,200,245,${.18 * easeOut(prog(t, s, .6))}) 0%, rgba(0,0,0,0) 70%)">
+      <div style="position:absolute;top:560px;left:0;right:0;text-align:center">${words(t, ['Conheça', 'o'], PH[16], .15, 'small dim')}</div>
+      <div style="position:absolute;top:660px;left:0;right:0;text-align:center;opacity:${clamp(prog(t, PH[16] + .3, .25))};transform:scale(${.8 + .2 * lp})">
+        <div style="font-weight:800;font-size:140px;letter-spacing:-4px;line-height:1"><span style="color:#fff">testcase</span><span style="color:#22C7F2;text-shadow:0 0 50px rgba(34,199,242,.6)">AI</span></div>
+        <div style="margin-top:30px;font-weight:600;font-size:44px;color:rgba(232,244,250,.75)">Do requisito ao release,<br>sem lacunas de qualidade.</div>
+      </div>
+      <div style="position:absolute;top:1130px;left:0;right:0;text-align:center;opacity:${clamp(prog(t, PH[18] + .5, .2))};transform:scale(${.7 + .3 * cp})">
+        <span class="pill" style="background:#22C7F2;color:#0B0B0F;box-shadow:0 16px 50px rgba(34,199,242,.4)">testcaseai.com.br</span>
+      </div>
+    </div>`;
+  }
+
+  root.innerHTML = h;
+  drawMapRed(mapF, mapO, mapTop);
+  document.getElementById('header').style.opacity = headerO;
+  const subEl = document.getElementById('subs');
+  subEl.innerHTML = sc === 6 ? '' : subs(t);
+  subEl.style.top = subTop + 'px';
+  const sx = shake ? Math.sin(t * 90) * shake : 0, sy = shake ? Math.cos(t * 73) * shake : 0;
+  root.style.transform = `translate(${sx}px,${sy}px)`;
+  document.getElementById('bg').style.setProperty('--glow', glow);
+}
+window.render = render;
+render(0);
+
+</script>
+</body>
+</html>
